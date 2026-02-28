@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@300;400;500;700&display=swap');
+
+:root {
+  /* Colors — Dark Mode (default) */
+  --c-bg:         #0a0a0a;
+  --c-surface:    #111111;
+  --c-surface-2:  #1a1a1a;
+  --c-border:     #2a2a2a;
+  --c-text:       #f0ebe0;     /* off-white / beige base */
+  --c-text-muted: #8a8070;
+  --c-accent:     #d4c5a9;     /* warm beige accent */
+  --c-glow:       rgba(212, 197, 169, 0.12);
+
+  /* Typography */
+  --font-heading: 'Outfit', sans-serif;
+  --font-body:    'Inter', sans-serif;
+
+  /* Spacing */
+  --space-xs:  0.25rem;  /* 4px */
+  --space-sm:  0.5rem;   /* 8px */
+  --space-md:  1rem;     /* 16px */
+  --space-lg:  1.5rem;   /* 24px */
+  --space-xl:  2.5rem;   /* 40px */
+  --space-2xl: 4rem;     /* 64px */
+
+  /* Radii */
+  --r-sm:   6px; 
+  --r-md:   12px; 
+  --r-lg:   20px; 
+  --r-full: 9999px;
+
+  /* Transitions */
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 150ms var(--ease-expo);
+  --transition-base: 300ms var(--ease-expo);
+  --transition-slow: 600ms var(--ease-expo);
+}
+
+[data-theme="light"] {
+  --c-bg:         #f5f0e8;
+  --c-surface:    #ede8df;
+  --c-surface-2:  #e0dbd2;
+  --c-border:     #c8c0b0;
+  --c-text:       #1a1814;
+  --c-text-muted: #7a7060;
+  --c-accent:     #5a4a2a;
+  --c-glow:       rgba(90, 74, 42, 0.08);
+}
