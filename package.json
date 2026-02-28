@@ -8,7 +8,7 @@
     ],
     "scripts": {
         "build": "npm run build --workspace=client",
-        "postinstall": "npm run postinstall --workspace=server"
+        "postinstall": "npx prisma@6 generate"
     },
     "dependencies": {
         "prisma": "^6.19.2",
