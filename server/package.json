@@ -5,7 +5,7 @@
   "main": "api/index.js",
   "scripts": {
     "start": "node server.js",
-    "postinstall": "prisma generate",
+    "postinstall": "npx prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -18,10 +18,12 @@
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "prisma": "^6.19.2"
+    "jsonwebtoken": "^9.0.3"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
+  },
+  "devDependencies": {
+    "prisma": "^6.19.2"
   }
 }
