@@ -9,7 +9,7 @@
     "scripts": {
         "build": "npm run build --workspace=client",
         "postinstall": "npm run postinstall --workspace=server"
-    }
+    },
     "dependencies": {
         "prisma": "^6.19.2",
         "@prisma/client": "^6.19.2"
