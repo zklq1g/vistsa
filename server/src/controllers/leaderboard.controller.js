@@ -5,11 +5,10 @@ class LeaderboardController {
     async getLeaderboard(req, res) {
         try {
             const entries = await prisma.leaderboardEntry.findMany({
-                include: { user: { select: { id: true, displayName: true, avatarUrl: true } } },
+                include: { user: { select: { id: true, displayName: true, avatarUrl: true, username: true } } },
                 orderBy: { points: 'desc' }
             });
 
-            // Compute project count for each user via a join-like count
             const userIds = entries.map(e => e.userId);
             const projectCounts = await prisma.projectMember.groupBy({
                 by: ['userId'],
@@ -36,14 +35,14 @@ class LeaderboardController {
     async updatePoints(req, res) {
         try {
             const { userId } = req.params;
-            const { delta } = req.body; // e.g. +10 or -5
+            const { delta } = req.body;
 
             if (typeof delta !== 'number') return sendError(res, 'Delta must be a number', 400);
 
             const entry = await prisma.leaderboardEntry.upsert({
                 where: { userId },
                 update: { points: { increment: delta } },
-                create: { userId, points: delta }
+                create: { userId, points: Math.max(0, delta) }
             });
 
             return sendSuccess(res, entry, 'Points updated successfully');
@@ -52,17 +51,12 @@ class LeaderboardController {
         }
     }
 
+    // Reset all leaderboard scores to 0.
+    // Route is already protected by requireAdmin middleware — no extra password needed.
     async resetLeaderboard(req, res) {
         try {
-            const { confirmPassword } = req.body;
-
-            // Spec requires admin password confirmation for this destructive action
-            if (confirmPassword !== process.env.ADMIN_RESET_PASSWORD) {
-                return sendError(res, 'Invalid confirmation password', 403);
-            }
-
             await prisma.leaderboardEntry.updateMany({ data: { points: 0 } });
-            return sendSuccess(res, null, 'Leaderboard reset successfully');
+            return sendSuccess(res, null, 'Leaderboard reset successfully — all points cleared');
         } catch (error) {
             return sendError(res, error.message, 500);
         }

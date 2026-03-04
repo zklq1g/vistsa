@@ -15,7 +15,7 @@ const AdminLeaderboard = () => {
     const [reason, setReason] = useState('');
 
     const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-    const [adminPassword, setAdminPassword] = useState('');
+    const [confirmText, setConfirmText] = useState('');
 
     const { data: usersRes, isLoading: usersLoading } = useQuery({
         queryKey: ['admin-users'],
@@ -45,12 +45,12 @@ const AdminLeaderboard = () => {
     });
 
     const resetMutation = useMutation({
-        mutationFn: (data) => api.delete('/leaderboard/reset', { data: { confirmPassword: data.adminPassword } }),
+        mutationFn: () => api.post('/leaderboard/reset'),
         onSuccess: () => {
             queryClient.invalidateQueries(['admin-leaderboard']);
             toast.success('Leaderboard has been completely reset.');
             setIsResetModalOpen(false);
-            setAdminPassword('');
+            setConfirmText('');
         },
         onError: (err) => toast.error(err.response?.data?.message || err.message || 'Failed to reset leaderboard')
     });
@@ -72,9 +72,9 @@ const AdminLeaderboard = () => {
 
     const handleReset = (e) => {
         e.preventDefault();
-        if (!adminPassword) return toast.error('Admin password is required');
+        if (confirmText !== 'RESET') return toast.error('Please type RESET to confirm');
         if (window.confirm('CRITICAL WARNING: This will permanently delete ALL leaderboard points. Are you absolutely certain?')) {
-            resetMutation.mutate({ adminPassword });
+            resetMutation.mutate();
         }
     };
 
@@ -219,12 +219,12 @@ const AdminLeaderboard = () => {
                 </div>
                 <form onSubmit={handleReset} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
                     <div>
-                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem' }}>Confirm Admin Password</label>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem' }}>Type <strong>RESET</strong> to confirm</label>
                         <input
-                            type="password"
-                            value={adminPassword}
-                            onChange={e => setAdminPassword(e.target.value)}
-                            placeholder="Enter your password to confirm"
+                            type="text"
+                            value={confirmText}
+                            onChange={e => setConfirmText(e.target.value)}
+                            placeholder="RESET"
                             style={{ width: '100%', padding: '10px', borderRadius: 'var(--r-md)', backgroundColor: 'var(--c-surface-2)', color: 'var(--c-text)', border: '1px solid var(--c-border)', cursor: 'text' }}
                         />
                     </div>

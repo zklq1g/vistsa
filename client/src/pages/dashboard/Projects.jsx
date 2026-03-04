@@ -10,7 +10,6 @@ import { ExternalLink, Github, Upload, X as XIcon } from 'lucide-react';
 
 const DashboardHome = () => {
     const queryClient = useQueryClient();
-    const fileInputRef = useRef(null);
 
     // ── Project list ────────────────────────────────────────────────────
     const [selectedProject, setSelectedProject] = useState(null);
@@ -23,55 +22,21 @@ const DashboardHome = () => {
 
     // ── Submit form state ────────────────────────────────────────────────
     const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
-    const [imagePreview, setImagePreview] = useState(null);
-    const [imageFile, setImageFile] = useState(null);
     const [formData, setFormData] = useState({
         title: '',
         description: '',
         techStack: '',
         githubUrl: '',
-        demoUrl: '',
+        thumbnailUrl: '',
     });
 
     const resetForm = () => {
-        setFormData({ title: '', description: '', techStack: '', githubUrl: '', demoUrl: '' });
-        setImagePreview(null);
-        setImageFile(null);
-    };
-
-    // Handle image selection, validate + generate preview
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const allowed = ['image/jpeg', 'image/png', 'image/webp'];
-        if (!allowed.includes(file.type)) {
-            toast.error('Only JPG, PNG, or WEBP images are accepted.');
-            return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            toast.error('Image must be under 5 MB.');
-            return;
-        }
-        setImageFile(file);
-        const reader = new FileReader();
-        reader.onload = (ev) => setImagePreview(ev.target.result);
-        reader.readAsDataURL(file);
+        setFormData({ title: '', description: '', techStack: '', githubUrl: '', demoUrl: '', thumbnailUrl: '' });
     };
 
     const submitMutation = useMutation({
         mutationFn: async (data) => {
-            // If an image file is selected, encode it as a base64 data URL
-            // and store it as thumbnailUrl (simple localStorage-friendly approach
-            // that avoids requiring a file-upload server)
-            let thumbnailUrl = null;
-            if (imageFile) {
-                thumbnailUrl = await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = ev => resolve(ev.target.result);
-                    reader.readAsDataURL(imageFile);
-                });
-            }
-            return api.post('/projects', { ...data, thumbnailUrl });
+            return api.post('/projects', data);
         },
         onSuccess: () => {
             queryClient.invalidateQueries(['projects']);
@@ -193,39 +158,19 @@ const DashboardHome = () => {
                             placeholder="Python, PyTorch, FastAPI (comma-separated)" style={styles.input} />
                     </div>
 
-                    {/* ── IMAGE UPLOAD ─── */}
+                    {/* ── IMAGE URL ─── */}
                     <div>
-                        <label style={styles.label}>Project Image (Optional — JPG, PNG, WEBP, max 5 MB)</label>
+                        <label style={styles.label}>Project Image URL (Optional)</label>
                         <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp"
-                            style={{ display: 'none' }}
-                            onChange={handleImageChange}
+                            type="text"
+                            value={formData.thumbnailUrl}
+                            onChange={e => setFormData({ ...formData, thumbnailUrl: e.target.value })}
+                            placeholder="https://i.imgur.com/..."
+                            style={styles.input}
                         />
-                        {imagePreview ? (
-                            <div style={{ position: 'relative' }}>
-                                <img src={imagePreview} alt="preview"
-                                    style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: 'var(--r-md)', border: '1px solid var(--c-border)' }} />
-                                <button
-                                    type="button"
-                                    onClick={() => { setImagePreview(null); setImageFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                                    style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                                >
-                                    <XIcon size={14} color="white" />
-                                </button>
-                            </div>
-                        ) : (
-                            <div
-                                onClick={() => fileInputRef.current?.click()}
-                                style={{ border: '2px dashed var(--c-border)', borderRadius: 'var(--r-md)', padding: '32px', textAlign: 'center', cursor: 'pointer', color: 'var(--c-text-muted)', transition: 'border-color 0.2s' }}
-                                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--c-accent)'}
-                                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--c-border)'}
-                            >
-                                <Upload size={24} style={{ marginBottom: '8px', opacity: 0.5 }} />
-                                <p style={{ margin: 0, fontSize: '0.875rem' }}>Click to upload project image</p>
-                            </div>
-                        )}
+                        <p style={{ fontSize: '0.75rem', color: 'var(--c-text-muted)', marginTop: '6px' }}>
+                            We do not host files directly. Please upload your image to <a href="https://imgbb.com/" target="_blank" rel="noreferrer" style={{ color: 'var(--c-accent)' }}>ImgBB</a> or <a href="https://imgur.com/" target="_blank" rel="noreferrer" style={{ color: 'var(--c-accent)' }}>Imgur</a> and paste the direct image link here.
+                        </p>
                     </div>
 
                     <div style={{ display: 'flex', gap: 'var(--space-md)' }}>
