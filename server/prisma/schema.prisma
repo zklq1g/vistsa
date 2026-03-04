@@ -107,17 +107,16 @@ model Event {
 // STUDY MATERIALS
 // ─────────────────────────────────────────────
 model StudyMaterial {
-  id              String   @id @default(cuid())
-  title           String
-  description     String?
-  fileUrl         String?
-  externalUrl     String?
-  category        String   // "ROADMAP", "PAPER", "TUTORIAL", "RESOURCE", "OTHER"
-  status          String   @default("APPROVED") // "PENDING", "APPROVED", "REJECTED"
-  rejectionReason String?
-  uploadedById    String
-  uploadedBy      User     @relation(fields: [uploadedById], references: [id])
-  createdAt       DateTime @default(now())
+  id          String            @id @default(cuid())
+  title       String
+  description String?
+  fileUrl     String?
+  externalUrl String?
+  category    String            // "ROADMAP", "PAPER", "TUTORIAL", "RESOURCE", "OTHER"
+  status      String            @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
+  uploadedById String
+  uploadedBy  User              @relation(fields: [uploadedById], references: [id])
+  createdAt   DateTime          @default(now())
 }
 
 // ─────────────────────────────────────────────
