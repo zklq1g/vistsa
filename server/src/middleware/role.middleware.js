@@ -16,6 +16,7 @@ const requireRole = (allowedRoles) => {
 
 // Convenience exports
 const requireAdmin = requireRole(['ADMIN']);
-const requireMember = requireRole(['MEMBER', 'ADMIN']);
+const requireMod = requireRole(['ADMIN', 'MOD']);
+const requireMember = requireRole(['MEMBER', 'MOD', 'ADMIN']);
 
-module.exports = { requireRole, requireAdmin, requireMember };
+module.exports = { requireRole, requireAdmin, requireMod, requireMember };

@@ -102,7 +102,7 @@ const AdminMembers = () => {
             <div style={{ backgroundColor: 'var(--c-surface)', borderRadius: 'var(--r-md)', border: '1px solid var(--c-border)', overflow: 'hidden' }}>
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: '1.5fr 1fr 140px 140px',
+                    gridTemplateColumns: '1.2fr 1fr 100px 140px',
                     padding: '16px 24px',
                     borderBottom: '1px solid var(--c-border)',
                     backgroundColor: 'var(--c-surface-2)',
@@ -112,14 +112,14 @@ const AdminMembers = () => {
                 }}>
                     <div>Member</div>
                     <div>Username</div>
-                    <div>Role</div>
+                    <div style={{ textAlign: 'left' }}>Role</div>
                     <div style={{ textAlign: 'right' }}>Actions</div>
                 </div>
 
                 {users?.map((user) => (
                     <div key={user.id} style={{
                         display: 'grid',
-                        gridTemplateColumns: '1.5fr 1fr 140px 140px',
+                        gridTemplateColumns: '1.2fr 1fr 100px 140px',
                         padding: '16px 24px',
                         borderBottom: '1px solid var(--c-border)',
                         alignItems: 'center',
@@ -130,8 +130,10 @@ const AdminMembers = () => {
                             {!user.isActive && <Badge variant="neutral" size="sm">DISABLED</Badge>}
                         </div>
                         <div style={{ color: 'var(--c-text-muted)', fontFamily: 'var(--font-mono)', fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.username}</div>
-                        <div>
-                            <Badge variant={user.role === 'ADMIN' ? 'accent' : 'neutral'}>{user.role}</Badge>
+                        <div style={{ textAlign: 'left' }}>
+                            <Badge variant={user.role === 'ADMIN' ? 'accent' : (user.role === 'MOD' ? 'warning' : 'neutral')}>
+                                {user.role === 'MOD' ? 'MOD' : user.role}
+                            </Badge>
                         </div>
                         <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end', alignItems: 'center' }}>
                             <Button
@@ -153,7 +155,7 @@ const AdminMembers = () => {
                                         toggleStatusMutation.mutate(user.id);
                                     }
                                 }}
-                                disabled={toggleStatusMutation.isPending || user.role === 'ADMIN'}
+                                disabled={toggleStatusMutation.isPending || (user.role === 'ADMIN') || (useAuthStore.getState().user?.role === 'MOD' && user.role !== 'MEMBER')}
                                 title={user.isActive ? 'Disable User' : 'Enable User'}
                                 style={{
                                     width: '34px',
@@ -162,7 +164,7 @@ const AdminMembers = () => {
                                     backgroundColor: user.isActive ? '#3fb950' : 'var(--c-surface-3)',
                                     position: 'relative',
                                     border: '1px solid var(--c-border)',
-                                    cursor: user.role === 'ADMIN' ? 'not-allowed' : 'pointer',
+                                    cursor: (user.role === 'ADMIN' || (useAuthStore.getState().user?.role === 'MOD' && user.role !== 'MEMBER')) ? 'not-allowed' : 'pointer',
                                     padding: 0,
                                     margin: '0 4px',
                                     transition: 'background-color 0.2s',
@@ -181,19 +183,22 @@ const AdminMembers = () => {
                                 }} />
                             </button>
 
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                    if (window.confirm(`PERMANENTLY DELETE ${user.username}? This cannot be undone.`)) {
-                                        hardDeleteMutation.mutate(user.id);
-                                    }
-                                }}
-                                disabled={hardDeleteMutation.isPending || user.role === 'ADMIN'}
-                                title="Permanently Delete"
-                            >
-                                <Trash2 size={16} color={user.role === 'ADMIN' ? 'var(--c-text-muted)' : '#f85149'} />
-                            </Button>
+                            {/* Delete strictly ADMIN only */}
+                            {useAuthStore.getState().user?.role === 'ADMIN' && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        if (window.confirm(`PERMANENTLY DELETE ${user.username}? This cannot be undone.`)) {
+                                            hardDeleteMutation.mutate(user.id);
+                                        }
+                                    }}
+                                    disabled={hardDeleteMutation.isPending || user.id === useAuthStore.getState().user?.id}
+                                    title="Permanently Delete"
+                                >
+                                    <Trash2 size={16} color={user.id === useAuthStore.getState().user?.id ? 'var(--c-text-muted)' : '#f85149'} />
+                                </Button>
+                            )}
                         </div>
                     </div>
                 ))}
@@ -242,7 +247,9 @@ const AdminMembers = () => {
                             style={styles.input}
                         >
                             <option value="MEMBER">Standard Member</option>
-                            <option value="SYSTEM ADMIN">System Administrator</option>
+                            {useAuthStore.getState().user?.role === 'ADMIN' && (
+                                <option value="MOD">Moderator (MOD)</option>
+                            )}
                         </select>
                     </div>
 

@@ -6,6 +6,7 @@ import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
 import { Check, X, ExternalLink, Github, Pin, Eye, Calendar, User } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
 
 const AdminApprovalQueue = () => {
     const queryClient = useQueryClient();
@@ -86,11 +87,13 @@ const AdminApprovalQueue = () => {
 
                 {isPending ? (
                     <>
-                        <Button variant="ghost" size="sm" onClick={() => {
-                            if (window.confirm('Delete this submission permanently?')) deleteMutation.mutate(proj.id);
-                        }} disabled={deleteMutation.isPending}>
-                            <X size={16} color="#f85149" />
-                        </Button>
+                        {useAuthStore.getState().user?.role === 'ADMIN' && (
+                            <Button variant="ghost" size="sm" onClick={() => {
+                                if (window.confirm('Delete this submission permanently?')) deleteMutation.mutate(proj.id);
+                            }} disabled={deleteMutation.isPending}>
+                                <X size={16} color="#f85149" />
+                            </Button>
+                        )}
                         <Button variant="primary" size="sm" onClick={() => approveMutation.mutate(proj.id)} disabled={approveMutation.isPending}>
                             <Check size={16} /> Approve
                         </Button>
@@ -100,11 +103,13 @@ const AdminApprovalQueue = () => {
                         <Button variant="secondary" size="sm" onClick={() => pinMutation.mutate(proj.id)} disabled={pinMutation.isPending}>
                             {proj.isPinned ? 'Unpin' : 'Pin'}
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => {
-                            if (window.confirm('Delete this project permanently?')) deleteMutation.mutate(proj.id);
-                        }} disabled={deleteMutation.isPending}>
-                            <X size={16} color="#f85149" />
-                        </Button>
+                        {useAuthStore.getState().user?.role === 'ADMIN' && (
+                            <Button variant="ghost" size="sm" onClick={() => {
+                                if (window.confirm('Delete this project permanently?')) deleteMutation.mutate(proj.id);
+                            }} disabled={deleteMutation.isPending}>
+                                <X size={16} color="#f85149" />
+                            </Button>
+                        )}
                     </>
                 )}
             </div>
@@ -193,14 +198,16 @@ const AdminApprovalQueue = () => {
                         {/* Action buttons in modal */}
                         {!selectedProject.isApproved && (
                             <div style={{ display: 'flex', gap: 'var(--space-md)', paddingTop: 'var(--space-md)', borderTop: '1px solid var(--c-border)' }}>
-                                <Button
-                                    variant="ghost"
-                                    onClick={() => { if (window.confirm('Delete permanently?')) deleteMutation.mutate(selectedProject.id); }}
-                                    disabled={deleteMutation.isPending}
-                                    style={{ borderColor: '#f85149', color: '#f85149', cursor: 'pointer' }}
-                                >
-                                    <X size={16} /> Reject & Delete
-                                </Button>
+                                {useAuthStore.getState().user?.role === 'ADMIN' && (
+                                    <Button
+                                        variant="ghost"
+                                        onClick={() => { if (window.confirm('Delete permanently?')) deleteMutation.mutate(selectedProject.id); }}
+                                        disabled={deleteMutation.isPending}
+                                        style={{ borderColor: '#f85149', color: '#f85149', cursor: 'pointer' }}
+                                    >
+                                        <X size={16} /> Reject & Delete
+                                    </Button>
+                                )}
                                 <Button
                                     variant="primary"
                                     onClick={() => approveMutation.mutate(selectedProject.id)}

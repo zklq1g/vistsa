@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import { Plus, Minus, RotateCcw } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
 
 const AdminLeaderboard = () => {
     const queryClient = useQueryClient();
@@ -89,9 +90,11 @@ const AdminLeaderboard = () => {
                     <p style={{ color: 'var(--c-text-muted)' }}>Award or deduct points per member for hackathons, papers, and contributions.</p>
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
-                    <Button variant="ghost" onClick={() => setIsResetModalOpen(true)}>
-                        <RotateCcw size={16} color="#f85149" /> <span style={{ color: '#f85149' }}>Reset Season</span>
-                    </Button>
+                    {useAuthStore.getState().user?.role === 'ADMIN' && (
+                        <Button variant="ghost" onClick={() => setIsResetModalOpen(true)}>
+                            <RotateCcw size={16} color="#f85149" /> <span style={{ color: '#f85149' }}>Reset Season</span>
+                        </Button>
+                    )}
                     <Button variant="ghost" onClick={() => openModal(true)} style={{ borderColor: '#f85149', color: '#f85149' }}>
                         <Minus size={18} /> Deduct
                     </Button>

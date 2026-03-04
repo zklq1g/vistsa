@@ -73,13 +73,14 @@ const DashboardLayout = ({ requireAdmin = false }) => {
         navigate('/login');
     };
 
-    const menuItems = requireAdmin ? [
+    const menuItems = (requireAdmin || user?.role === 'MOD') ? [
         { icon: ShieldAlert, label: 'Approval Queue', to: '/admin' },
         { icon: Trophy, label: 'Manage Leaderboard', to: '/admin/leaderboard' },
         { icon: Users, label: 'Manage Members', to: '/admin/members' },
         { icon: Calendar, label: 'Manage Events', to: '/admin/events' },
         { icon: BookOpen, label: 'Study Resources', to: '/admin/study' },
-        { icon: BarChart2, label: 'Homepage Stats', to: '/admin/stats' },
+        // Only Admin sees Homepage Stats
+        ...(user?.role === 'ADMIN' ? [{ icon: BarChart2, label: 'Homepage Stats', to: '/admin/stats' }] : []),
     ] : [
         { icon: FolderGit2, label: 'Projects', to: '/dashboard' },
         { icon: Trophy, label: 'Leaderboard', to: '/dashboard/leaderboard' },

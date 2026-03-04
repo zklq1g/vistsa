@@ -6,6 +6,7 @@ import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Badge from '../../components/ui/Badge';
 import { FileUp, Trash2, Link as LinkIcon, Download, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
 
 const getBadgeVariant = (status) => {
     if (status === 'APPROVED') return 'success';
@@ -210,13 +211,15 @@ const AdminStudy = () => {
                                 {mat.fileUrl && <a href={mat.fileUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--c-text-muted)' }}><Download size={16} /></a>}
                             </div>
                             <div style={{ textAlign: 'center' }}>
-                                <Button
-                                    variant="ghost" size="sm"
-                                    onClick={() => { if (window.confirm('Delete this resource?')) deleteMutation.mutate(mat.id); }}
-                                    disabled={deleteMutation.isPending}
-                                >
-                                    <Trash2 size={16} color="#f85149" />
-                                </Button>
+                                {useAuthStore.getState().user?.role === 'ADMIN' && (
+                                    <Button
+                                        variant="ghost" size="sm"
+                                        onClick={() => { if (window.confirm('Delete this resource?')) deleteMutation.mutate(mat.id); }}
+                                        disabled={deleteMutation.isPending}
+                                    >
+                                        <Trash2 size={16} color="#f85149" />
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     ))}

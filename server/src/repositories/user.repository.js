@@ -17,8 +17,11 @@ class UserRepository {
         return prisma.user.update({ where: { id }, data });
     }
 
-    async findAll() {
-        return prisma.user.findMany({ select: { id: true, username: true, displayName: true, role: true, isActive: true } });
+    async findAll(where = {}) {
+        return prisma.user.findMany({
+            where,
+            select: { id: true, username: true, displayName: true, role: true, isActive: true }
+        });
     }
 
     async delete(id) {

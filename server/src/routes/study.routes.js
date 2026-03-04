@@ -1,7 +1,7 @@
 const express = require('express');
 const studyController = require('../controllers/study.controller');
 const authMiddleware = require('../middleware/auth.middleware');
-const { requireMember, requireAdmin } = require('../middleware/role.middleware');
+const { requireMember, requireAdmin, requireMod } = require('../middleware/role.middleware');
 
 const router = express.Router();
 
@@ -17,23 +17,23 @@ router.post('/submit', requireMember, studyController.submitMaterial);
 // GET own submissions with status (members)
 router.get('/my-submissions', requireMember, studyController.getMySubmissions);
 
-// ── Admin routes ──────────────────────────────────────────────────────────────
-router.use(requireAdmin);
+// ── Management routes (MOD & ADMIN) ──────────────────────────────────────────────
 
 // GET all materials with any status (admin view)
-router.get('/all', studyController.getAllMaterials);
+router.get('/all', requireMod, studyController.getAllMaterials);
 
 // GET only pending submissions
-router.get('/pending', studyController.getPendingMaterials);
+router.get('/pending', requireMod, studyController.getPendingMaterials);
 
 // POST direct admin upload (auto-approved)
-router.post('/', studyController.uploadMaterial);
+router.post('/', requireMod, studyController.uploadMaterial);
 
 // PATCH approve or reject a pending submission
-router.patch('/:id/approve', studyController.approveMaterial);
-router.patch('/:id/reject', studyController.rejectMaterial);
+router.patch('/:id/approve', requireMod, studyController.approveMaterial);
+router.patch('/:id/reject', requireMod, studyController.rejectMaterial);
 
-// DELETE any material (admin can delete any)
-router.delete('/:id', studyController.deleteMaterial);
+// ── Admin-only routes ────────────────────────────────────────────────────────
+// DELETE any material (ONLY ADMIN)
+router.delete('/:id', requireAdmin, studyController.deleteMaterial);
 
 module.exports = router;
