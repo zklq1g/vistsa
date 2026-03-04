@@ -29,7 +29,6 @@ const Login = () => {
                 login(response.data.user, response.data.token);
                 toast.success(`Welcome back, ${response.data.user.displayName}`);
 
-                // Redirect based on role
                 if (response.data.user.role === 'ADMIN') {
                     navigate('/admin');
                 } else {
@@ -50,11 +49,11 @@ const Login = () => {
             animate="animate"
             exit="exit"
             style={{
-                minHeight: '100vh',
+                minHeight: '100svh', /* Use svh to avoid mobile browser chrome */
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: 'var(--space-md)'
+                padding: 'var(--space-md)',
             }}
         >
             <div
@@ -62,15 +61,15 @@ const Login = () => {
                 style={{
                     width: '100%',
                     maxWidth: '400px',
-                    padding: 'var(--space-xl)',
+                    padding: 'clamp(1.5rem, 5vw, 2.5rem)',
                     borderRadius: 'var(--r-lg)',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: 'var(--space-lg)'
+                    gap: 'var(--space-lg)',
                 }}
             >
                 <div style={{ textAlign: 'center' }}>
-                    <h1 style={{ fontSize: '2rem', color: 'var(--c-accent)', marginBottom: 'var(--space-sm)' }}>
+                    <h1 style={{ fontSize: 'clamp(1.6rem, 5vw, 2rem)', color: 'var(--c-accent)', marginBottom: 'var(--space-sm)' }}>
                         VISTA Portal
                     </h1>
                     <p style={{ color: 'var(--c-text-muted)', fontSize: '0.875rem' }}>
@@ -80,28 +79,42 @@ const Login = () => {
 
                 <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
                     <div>
-                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: 500 }}>
+                        <label
+                            htmlFor="username"
+                            style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: 500 }}
+                        >
                             Username
                         </label>
                         <input
+                            id="username"
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             style={styles.input}
                             placeholder="Enter your username"
+                            autoComplete="username"
+                            autoCapitalize="none"
+                            autoCorrect="off"
+                            spellCheck="false"
+                            inputMode="text"
                         />
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: 500 }}>
+                        <label
+                            htmlFor="password"
+                            style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: 500 }}
+                        >
                             Password
                         </label>
                         <input
+                            id="password"
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             style={styles.input}
                             placeholder="Enter your password"
+                            autoComplete="current-password"
                         />
                     </div>
 
@@ -110,13 +123,13 @@ const Login = () => {
                         variant="primary"
                         size="lg"
                         disabled={isLoading}
-                        style={{ marginTop: 'var(--space-sm)' }}
+                        style={{ marginTop: 'var(--space-sm)', width: '100%' }}
                     >
                         {isLoading ? 'Authenticating...' : 'Secure Login'}
                     </Button>
                 </form>
 
-                <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--c-text-muted)', marginTop: 'var(--space-md)' }}>
+                <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--c-text-muted)' }}>
                     To request an account, please contact the society administrators.
                 </p>
             </div>
@@ -133,9 +146,13 @@ const styles = {
         backgroundColor: 'var(--c-surface-2)',
         color: 'var(--c-text)',
         fontFamily: 'var(--font-body)',
-        fontSize: '1rem',
+        /* 16px font is critical on iOS — below this size, iOS zooms on focus */
+        fontSize: '16px',
         outline: 'none',
-        transition: 'border-color 0.2s'
+        transition: 'border-color 0.2s',
+        /* Ensure 44px touch target height */
+        minHeight: '48px',
+        touchAction: 'manipulation',
     }
 };
 

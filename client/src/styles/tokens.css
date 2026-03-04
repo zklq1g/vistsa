@@ -1,3 +1,4 @@
+/* Optimized font loading with display=swap */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@300;400;500;700&display=swap');
 
 :root {
@@ -14,6 +15,7 @@
   /* Typography */
   --font-heading: 'Outfit', sans-serif;
   --font-body:    'Inter', sans-serif;
+  --font-mono:    'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
 
   /* Spacing */
   --space-xs:  0.25rem;  /* 4px */
@@ -22,6 +24,7 @@
   --space-lg:  1.5rem;   /* 24px */
   --space-xl:  2.5rem;   /* 40px */
   --space-2xl: 4rem;     /* 64px */
+  --space-3xl: 6rem;     /* 96px */
 
   /* Radii */
   --r-sm:   6px; 
@@ -34,6 +37,9 @@
   --transition-fast: 150ms var(--ease-expo);
   --transition-base: 300ms var(--ease-expo);
   --transition-slow: 600ms var(--ease-expo);
+
+  /* Touch target minimum size */
+  --touch-target: 44px;
 }
 
 [data-theme="light"] {

@@ -17,7 +17,9 @@ body {
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* cursor is restored to normal by default — see .has-custom-cursor below */
+    /* Prevent unwanted text size adjustment on mobile rotation */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 /* Applied ONLY to the public layout (Home page).
@@ -70,24 +72,48 @@ button {
     cursor: pointer;
     border: none;
     background: none;
+    /* Remove 300ms tap delay on iOS */
+    touch-action: manipulation;
+    /* Remove tap highlight on Android */
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-    width: 6px;
+/* All interactive elements: no tap flash, proper sizing */
+a,
+button,
+[role="button"],
+input,
+select,
+textarea {
+    -webkit-tap-highlight-color: transparent;
 }
 
-::-webkit-scrollbar-track {
-    background: var(--c-bg);
+/* Enforce minimum touch target size for all buttons */
+button,
+a {
+    min-height: var(--touch-target);
+    display: inline-flex;
+    align-items: center;
 }
 
-::-webkit-scrollbar-thumb {
-    background: var(--c-border);
-    border-radius: var(--r-full);
-}
+/* Custom Scrollbar (desktop) */
+@media (hover: hover) {
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
 
-::-webkit-scrollbar-thumb:hover {
-    background: var(--c-text-muted);
+    ::-webkit-scrollbar-track {
+        background: var(--c-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--c-border);
+        border-radius: var(--r-full);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--c-text-muted);
+    }
 }
 
 /* ─── Glassmorphism Utilities ─── */
@@ -149,17 +175,71 @@ button {
     scrollbar-width: none;
     -ms-overflow-style: none;
     padding-bottom: var(--space-sm);
+    /* Native momentum scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+    /* Scroll snap */
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
 }
 
 .h-scroll-container::-webkit-scrollbar {
     display: none;
 }
 
+/* Project cards inside scroll container: snap each card */
+.h-scroll-container>* {
+    scroll-snap-align: start;
+}
+
 /* ─── Counter number ─── */
 .counter-num {
     font-family: var(--font-heading);
-    font-size: clamp(3rem, 8vw, 6rem);
+    font-size: clamp(2.5rem, 8vw, 6rem);
     font-weight: 600;
     color: var(--c-accent);
     line-height: 1;
+}
+
+/* ─── Visibility helpers ─── */
+.mobile-only {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mobile-only {
+        display: flex;
+    }
+
+    .desktop-only {
+        display: none !important;
+    }
+}
+
+/* ─── Reduced motion: skip all animations ─── */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .split-char,
+    .gsap-fade-up,
+    .magnetic-btn {
+        will-change: auto;
+    }
+}
+
+/* ─── Mobile layout helpers ─── */
+@media (max-width: 768px) {
+
+    /* Reduce heavy blur on mobile GPU */
+    .glass {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
 }
