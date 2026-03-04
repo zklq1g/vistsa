@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { LazyMotion, domAnimation } from 'framer-motion';
 import AppRouter from './router';
 import CursorFollower from './components/layout/CursorFollower';
+import ErrorBoundary from './components/layout/ErrorBoundary';
 
 // Design system styles
 import './styles/tokens.css';
@@ -27,9 +28,11 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <CursorFollower />
-        <LazyMotion features={domAnimation}>
-          <AppRouter />
-        </LazyMotion>
+        <ErrorBoundary>
+          <LazyMotion features={domAnimation}>
+            <AppRouter />
+          </LazyMotion>
+        </ErrorBoundary>
       </BrowserRouter>
 
       <Toaster

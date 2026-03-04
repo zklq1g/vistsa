@@ -1,7 +1,17 @@
 import { create } from 'zustand';
 
+const getInitialUser = () => {
+    try {
+        const saved = localStorage.getItem('vista_user');
+        return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+        console.error('Failed to parse user from localStorage', e);
+        return null;
+    }
+};
+
 export const useAuthStore = create((set) => ({
-    user: JSON.parse(localStorage.getItem('vista_user')) || null,
+    user: getInitialUser(),
     token: localStorage.getItem('vista_token') || null,
     isLoggedIn: !!localStorage.getItem('vista_token'),
 

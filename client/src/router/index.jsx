@@ -26,9 +26,11 @@ import AdminStats from '../pages/admin/ManageStats';
 import Home from '../pages/public/Home';
 
 const AppRouter = () => {
+    const location = useLocation();
+
     return (
         <AnimatePresence mode="wait">
-            <Routes>
+            <Routes location={location} key={location.pathname}>
                 {/* PUBLIC ROUTES */}
                 <Route element={<PublicLayout />}>
                     <Route path="/" element={<Home />} />
@@ -67,6 +69,9 @@ const AppRouter = () => {
                     <Route path="study" element={<AdminStudy />} />
                     <Route path="stats" element={<AdminStats />} />
                 </Route>
+
+                {/* CATCH ALL */}
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </AnimatePresence>
     );
