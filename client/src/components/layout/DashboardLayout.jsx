@@ -15,7 +15,8 @@ import {
     Users,
     BarChart2,
     Menu,
-    X
+    X,
+    ShieldCheck
 } from 'lucide-react';
 
 const SidebarItem = ({ icon: Icon, label, to, isCollapsed, onClick }) => (
@@ -73,20 +74,28 @@ const DashboardLayout = ({ requireAdmin = false }) => {
         navigate('/login');
     };
 
-    const menuItems = (requireAdmin || user?.role === 'MOD') ? [
+    const isModeratorPanel = location.pathname.startsWith('/moderator') || (user?.role === 'MOD' && !location.pathname.startsWith('/dashboard'));
+
+    const menuItems = isModeratorPanel ? [
+        { icon: LayoutDashboard, label: 'Moderator Home', to: '/moderator' },
+        { icon: ShieldAlert, label: 'Approval Queue', to: '/moderator/approval' },
+        { icon: Trophy, label: 'Manage Leaderboard', to: '/moderator/leaderboard' },
+        { icon: Users, label: 'Manage Members', to: '/moderator/members' },
+        { icon: Calendar, label: 'Manage Events', to: '/moderator/events' },
+        { icon: BookOpen, label: 'Study Resources', to: '/moderator/study' },
+    ] : (requireAdmin ? [
         { icon: ShieldAlert, label: 'Approval Queue', to: '/admin' },
         { icon: Trophy, label: 'Manage Leaderboard', to: '/admin/leaderboard' },
         { icon: Users, label: 'Manage Members', to: '/admin/members' },
         { icon: Calendar, label: 'Manage Events', to: '/admin/events' },
         { icon: BookOpen, label: 'Study Resources', to: '/admin/study' },
-        // Only Admin sees Homepage Stats
-        ...(user?.role === 'ADMIN' ? [{ icon: BarChart2, label: 'Homepage Stats', to: '/admin/stats' }] : []),
+        { icon: BarChart2, label: 'Homepage Stats', to: '/admin/stats' },
     ] : [
         { icon: FolderGit2, label: 'Projects', to: '/dashboard' },
         { icon: Trophy, label: 'Leaderboard', to: '/dashboard/leaderboard' },
         { icon: BookOpen, label: 'Study Wing', to: '/dashboard/study' },
         { icon: Calendar, label: 'Events', to: '/dashboard/events' },
-    ];
+    ]);
 
     const sidebarContent = (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -99,14 +108,17 @@ const DashboardLayout = ({ requireAdmin = false }) => {
                 borderBottom: '1px solid var(--c-border)',
             }}>
                 {(!isCollapsed || isMobile) && (
-                    <span style={{
-                        fontFamily: 'var(--font-heading)',
-                        fontSize: '1.5rem',
-                        fontWeight: 700,
-                        color: 'var(--c-accent)'
-                    }}>
-                        VISTA
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{
+                            fontFamily: 'var(--font-heading)',
+                            fontSize: '1.5rem',
+                            fontWeight: 700,
+                            color: isModeratorPanel ? '#3fb950' : 'var(--c-accent)'
+                        }}>
+                            VISTA
+                        </span>
+                        {isModeratorPanel && <ShieldCheck size={18} color="#3fb950" />}
+                    </div>
                 )}
                 {isMobile ? (
                     <button
@@ -143,6 +155,17 @@ const DashboardLayout = ({ requireAdmin = false }) => {
 
             {/* Nav items */}
             <nav style={{ flex: 1, padding: '12px', overflowY: 'auto' }}>
+                {isModeratorPanel && !isCollapsed && (
+                    <div style={{
+                        padding: '0 16px 8px',
+                        fontSize: '0.75rem',
+                        textTransform: 'uppercase',
+                        color: '#3fb950',
+                        letterSpacing: '0.05em'
+                    }}>
+                        Moderator Portal
+                    </div>
+                )}
                 {requireAdmin && !isCollapsed && (
                     <div style={{
                         padding: '0 16px 8px',

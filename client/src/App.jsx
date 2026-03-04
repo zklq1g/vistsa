@@ -54,15 +54,43 @@ const App = () => {
   if (isInitializing) {
     return (
       <div style={{
-        height: '100vh',
+        height: '100svh',
         backgroundColor: 'var(--c-bg)',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        color: 'var(--c-text-muted)',
-        fontFamily: 'var(--font-body)'
+        fontFamily: 'var(--font-heading)',
+        gap: 'var(--space-md)'
       }}>
-        Initializing...
+        <div style={{
+          fontSize: '2rem',
+          fontWeight: 700,
+          color: 'var(--c-accent)',
+          letterSpacing: '-0.02em'
+        }}>
+          VISTA
+        </div>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          color: 'var(--c-text-muted)',
+          fontSize: '0.875rem'
+        }}>
+          <div className="spinner" style={{
+            width: '16px',
+            height: '16px',
+            border: '2px solid var(--c-border)',
+            borderTopColor: 'var(--c-accent)',
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite'
+          }} />
+          <span>Restoring session...</span>
+        </div>
+        <style>{`
+          @keyframes spin { to { transform: rotate(360deg); } }
+        `}</style>
       </div>
     );
   }
