@@ -5,6 +5,8 @@ import { Toaster } from 'react-hot-toast';
 import { LazyMotion, domAnimation } from 'framer-motion';
 import AppRouter from './router';
 import CursorFollower from './components/layout/CursorFollower';
+import { useAuthStore } from './store/authStore';
+import api from './services/api';
 
 // Design system styles
 import './styles/tokens.css';
@@ -23,6 +25,48 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
+  const { token, setUser, isLoggedIn } = useAuthStore();
+  const [isInitializing, setIsInitializing] = React.useState(!!token);
+
+  React.useEffect(() => {
+    const initAuth = async () => {
+      if (token && !useAuthStore.getState().user) {
+        try {
+          const res = await api.get('/auth/me');
+          if (res.success) {
+            setUser(res.data.user);
+          } else {
+            // Token might be invalid, but api.js interceptor handles 401
+          }
+        } catch (err) {
+          console.error('Initial auth fetch failed', err);
+        } finally {
+          setIsInitializing(false);
+        }
+      } else {
+        setIsInitializing(false);
+      }
+    };
+
+    initAuth();
+  }, [token, setUser]);
+
+  if (isInitializing) {
+    return (
+      <div style={{
+        height: '100vh',
+        backgroundColor: 'var(--c-bg)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'var(--c-text-muted)',
+        fontFamily: 'var(--font-body)'
+      }}>
+        Initializing...
+      </div>
+    );
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

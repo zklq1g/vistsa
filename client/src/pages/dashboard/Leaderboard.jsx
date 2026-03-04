@@ -56,7 +56,7 @@ const Leaderboard = () => {
                     >
                         {entries?.map((entry, index) => (
                             <motion.div
-                                key={entry.user.id}
+                                key={entry.user?.id || entry.userId || index}
                                 variants={{
                                     initial: { opacity: 0, x: -20 },
                                     animate: { opacity: 1, x: 0 }

@@ -29,7 +29,7 @@ const Login = () => {
                 login(response.data.user, response.data.token);
                 toast.success(`Welcome back, ${response.data.user.displayName}`);
 
-                if (response.data.user.role === 'ADMIN') {
+                if (response.data.user.role === 'ADMIN' || response.data.user.role === 'MOD') {
                     navigate('/admin');
                 } else {
                     navigate('/dashboard');

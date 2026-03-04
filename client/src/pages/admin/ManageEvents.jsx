@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Badge from '../../components/ui/Badge';
+import { useAuthStore } from '../../store/authStore';
 import { CalendarPlus, Trash2, MapPin } from 'lucide-react';
 
 const AdminEvents = () => {
@@ -102,15 +103,17 @@ const AdminEvents = () => {
                         </div>
 
                         <div>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                    if (window.confirm('Delete this event?')) deleteMutation.mutate(event.id);
-                                }}
-                            >
-                                <Trash2 size={16} color="#f85149" />
-                            </Button>
+                            {useAuthStore.getState().user?.role === 'ADMIN' && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        if (window.confirm('Delete this event?')) deleteMutation.mutate(event.id);
+                                    }}
+                                >
+                                    <Trash2 size={16} color="#f85149" />
+                                </Button>
+                            )}
                         </div>
                     </div>
                 ))}
