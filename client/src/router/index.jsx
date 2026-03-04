@@ -21,7 +21,6 @@ import AdminMembers from '../pages/admin/ManageMembers';
 import AdminEvents from '../pages/admin/ManageEvents';
 import AdminStudy from '../pages/admin/ManageStudy';
 import AdminStats from '../pages/admin/ManageStats';
-import ModeratorHome from '../pages/moderator/ModeratorHome';
 
 // Import real Home page
 import Home from '../pages/public/Home';
@@ -78,7 +77,7 @@ const AppRouter = () => {
                         </ProtectedRoute>
                     }
                 >
-                    <Route index element={<ModeratorHome />} />
+                    <Route index element={<AdminApprovalQueue />} />
                     <Route path="approval" element={<AdminApprovalQueue />} />
                     <Route path="leaderboard" element={<AdminLeaderboard />} />
                     <Route path="members" element={<AdminMembers />} />

@@ -13,7 +13,6 @@ import {
     ChevronRight,
     User,
     Users,
-    BarChart2,
     Menu,
     X,
     ShieldCheck,
@@ -78,8 +77,7 @@ const DashboardLayout = ({ requireAdmin = false }) => {
     const isModeratorPanel = location.pathname.startsWith('/moderator') || (user?.role === 'MOD' && !location.pathname.startsWith('/dashboard'));
 
     const menuItems = isModeratorPanel ? [
-        { icon: LayoutDashboard, label: 'Moderator Home', to: '/moderator' },
-        { icon: ShieldAlert, label: 'Approval Queue', to: '/moderator/approval' },
+        { icon: ShieldAlert, label: 'Approval Queue', to: '/moderator' },
         { icon: Trophy, label: 'Manage Leaderboard', to: '/moderator/leaderboard' },
         { icon: Users, label: 'Manage Members', to: '/moderator/members' },
         { icon: Calendar, label: 'Manage Events', to: '/moderator/events' },

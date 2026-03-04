@@ -5,7 +5,8 @@ import toast from 'react-hot-toast';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Badge from '../../components/ui/Badge';
-import { UserPlus, Settings2, Trash2 } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
+import { UserPlus, Settings2, Trash2, Users } from 'lucide-react';
 
 const AdminMembers = () => {
     const queryClient = useQueryClient();
@@ -85,7 +86,7 @@ const AdminMembers = () => {
         createMutation.mutate(formData);
     };
 
-    if (isLoading) return <div style={{ color: 'var(--c-text-muted)' }}>Loading members database...</div>;
+    if (isLoading) return <div style={{ padding: '40px', color: 'var(--c-text-muted)' }}>Loading members database...</div>;
 
     return (
         <div>
@@ -202,6 +203,18 @@ const AdminMembers = () => {
                         </div>
                     </div>
                 ))}
+
+                {users?.length === 0 && (
+                    <div style={{ padding: '64px 24px', textAlign: 'center', color: 'var(--c-text-muted)' }}>
+                        <Users size={48} style={{ opacity: 0.15, margin: '0 auto 16px', display: 'block' }} />
+                        <h3 style={{ color: 'var(--c-text)', marginBottom: '8px' }}>No Members Found</h3>
+                        <p style={{ fontSize: '0.9rem', maxWidth: '300px', margin: '0 auto' }}>
+                            {useAuthStore.getState().user?.role === 'MOD'
+                                ? "You only have permission to view and manage 'MEMBER' accounts."
+                                : "Currently there are no other member accounts in the system."}
+                        </p>
+                    </div>
+                )}
             </div>
 
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Create New Account">
@@ -261,7 +274,6 @@ const AdminMembers = () => {
                 </form>
             </Modal>
 
-            {/* EDIT MODAL */}
             <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title={`Edit ${editingUser?.displayName}`}>
                 <div style={{ marginBottom: 'var(--space-md)', padding: '12px', backgroundColor: 'var(--c-surface-2)', borderRadius: 'var(--r-md)' }}>
                     <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--c-text-muted)' }}>
@@ -292,7 +304,6 @@ const AdminMembers = () => {
                     </div>
                 </form>
             </Modal>
-
         </div>
     );
 };
