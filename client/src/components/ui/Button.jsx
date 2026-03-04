@@ -10,7 +10,8 @@ const Button = ({
     onClick,
     type = 'button',
     disabled = false,
-    icon = null
+    icon = null,
+    style: styleProp = {}
 }) => {
 
     const baseStyles = {
@@ -49,9 +50,9 @@ const Button = ({
     };
 
     const sizes = {
-        sm: { padding: '6px 16px', fontSize: '0.875rem' },
-        md: { padding: '10px 24px', fontSize: '1rem' },
-        lg: { padding: '14px 32px', fontSize: '1.125rem' }
+        sm: { padding: '10px 16px', fontSize: '0.875rem', minHeight: '40px' },
+        md: { padding: '12px 24px', fontSize: '1rem', minHeight: '44px' },
+        lg: { padding: '14px 32px', fontSize: '1.125rem', minHeight: '48px' }
     };
 
     const getStyle = () => ({
@@ -59,7 +60,10 @@ const Button = ({
         ...variants[variant],
         ...sizes[size],
         opacity: disabled ? 0.5 : 1,
-        cursor: disabled ? 'not-allowed' : 'pointer'
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        touchAction: 'manipulation',
+        WebkitTapHighlightColor: 'transparent',
+        ...styleProp,
     });
 
     return (

@@ -78,7 +78,7 @@ button {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* All interactive elements: no tap flash, proper sizing */
+/* All interactive elements: no tap flash */
 a,
 button,
 [role="button"],
@@ -86,14 +86,6 @@ input,
 select,
 textarea {
     -webkit-tap-highlight-color: transparent;
-}
-
-/* Enforce minimum touch target size for all buttons */
-button,
-a {
-    min-height: var(--touch-target);
-    display: inline-flex;
-    align-items: center;
 }
 
 /* Custom Scrollbar (desktop) */
