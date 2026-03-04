@@ -30,20 +30,24 @@ const App = () => {
 
   React.useEffect(() => {
     const initAuth = async () => {
+      console.log('VISTA: Starting auth initialization...', { hasToken: !!token });
       if (token && !useAuthStore.getState().user) {
         try {
+          console.log('VISTA: Fetching user data...');
           const res = await api.get('/auth/me');
+          console.log('VISTA: Auth response:', res);
           if (res.success) {
             setUser(res.data.user);
-          } else {
-            // Token might be invalid, but api.js interceptor handles 401
+            console.log('VISTA: User set successfully:', res.data.user.role);
           }
         } catch (err) {
-          console.error('Initial auth fetch failed', err);
+          console.error('VISTA: Initial auth fetch error:', err);
         } finally {
+          console.log('VISTA: Finishing initialization...');
           setIsInitializing(false);
         }
       } else {
+        console.log('VISTA: No token or user already exists, skipping fetch.');
         setIsInitializing(false);
       }
     };
