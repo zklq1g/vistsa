@@ -45,7 +45,7 @@ const AdminLeaderboard = () => {
     });
 
     const resetMutation = useMutation({
-        mutationFn: () => api.delete('/leaderboard/reset'),
+        mutationFn: () => api.post('/leaderboard/reset'),
         onSuccess: (res) => {
             queryClient.invalidateQueries(['admin-leaderboard']);
             const count = res.data?.count || 0;
