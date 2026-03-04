@@ -29,30 +29,18 @@ api.interceptors.response.use(
         const status = error.response?.status;
         const message = error.response?.data?.message || 'Something went wrong';
 
-        if (status === 401) {
-            // Auto logout on token expiration
-            useAuthStore.getState().logout();
-            if (window.location.pathname !== '/login') {
-                toast.error('Session expired. Please log in again.');
-                window.location.href = '/login';
-            }
-        } else if (status === 403) {
-            toast.error('You do not have permission to perform this action.');
-        } else {
-            // Unhandled 400 or 500+ series errors trigger the Global Error Modal
-            toast.error(status >= 500 ? 'Server error. Additional details in popup.' : message);
 
-            // Push full debug info to the global error store to show the modal
-            useErrorStore.getState().showError({
-                status,
-                message,
-                endpoint: error.config?.url,
-                method: error.config?.method,
-                raw: error.response?.data || error.message
-            });
-        }
+        // Push full debug info to the global error store to show the modal
+        useErrorStore.getState().showError({
+            status,
+            message,
+            endpoint: error.config?.url,
+            method: error.config?.method,
+            raw: error.response?.data || error.message
+        });
+    }
 
-        return Promise.reject(error.response?.data || { message });
+return Promise.reject(error.response?.data || { message });
     }
 );
 

@@ -54,11 +54,14 @@ class LeaderboardController {
 
     async resetLeaderboard(req, res) {
         try {
-            // Admin auth is already enforced by requireAdmin middleware on this route.
-            // No secondary password required — that env var was often unset, causing permanent 403.
+            console.log(`[Admin] Resetting leaderboard requested by ${req.user.username}`);
+            // Resetting all points to 0 effectively resets the season ranking
             const result = await prisma.leaderboardEntry.updateMany({ data: { points: 0 } });
+
+            console.log(`[Admin] Reset successful. Rows affected: ${result.count}`);
             return sendSuccess(res, { count: result.count }, `Leaderboard reset successfully for ${result.count} members`);
         } catch (error) {
+            console.error('[Admin] Leaderboard reset failed:', error);
             return sendError(res, error.message, 500);
         }
     }
