@@ -10,6 +10,8 @@ import CursorFollower from './components/layout/CursorFollower';
 import './styles/tokens.css';
 import './styles/global.css';
 
+import GlobalErrorModal from './components/layout/GlobalErrorModal';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -48,6 +50,9 @@ const App = () => {
           },
         }}
       />
+
+      {/* Global Error Popup triggered by api.js */}
+      <GlobalErrorModal />
     </QueryClientProvider>
   );
 };

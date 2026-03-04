@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
+import { useErrorStore } from '../store/errorStore';
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -37,8 +38,18 @@ api.interceptors.response.use(
             }
         } else if (status === 403) {
             toast.error('You do not have permission to perform this action.');
-        } else if (status >= 500) {
-            toast.error('Server error. Please try again later.');
+        } else {
+            // Unhandled 400 or 500+ series errors trigger the Global Error Modal
+            toast.error(status >= 500 ? 'Server error. Additional details in popup.' : message);
+
+            // Push full debug info to the global error store to show the modal
+            useErrorStore.getState().showError({
+                status,
+                message,
+                endpoint: error.config?.url,
+                method: error.config?.method,
+                raw: error.response?.data || error.message
+            });
         }
 
         return Promise.reject(error.response?.data || { message });
