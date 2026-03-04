@@ -6,8 +6,8 @@ import * as random from 'maath/random/dist/maath-random.esm';
 const ParticleField = (props) => {
     const ref = useRef();
 
-    // Create 5000 random points in a sphere
-    const sphere = useMemo(() => random.inSphere(new Float32Array(5000), { radius: 1.5 }), []);
+    // Create 5000 random points in a sphere (3 coordinates per point)
+    const sphere = useMemo(() => random.inSphere(new Float32Array(5000 * 3), { radius: 1.5 }), []);
 
     useFrame((state, delta) => {
         // Slow cinematic rotation

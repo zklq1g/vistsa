@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
 import PublicLayout from '../components/layout/PublicLayout';
@@ -85,6 +85,9 @@ const AppRouter = () => {
                     <Route path="events" element={<AdminEvents />} />
                     <Route path="study" element={<AdminStudy />} />
                 </Route>
+
+                {/* 404 FALLBACK */}
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </AnimatePresence>
     );

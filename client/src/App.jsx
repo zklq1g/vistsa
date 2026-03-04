@@ -92,6 +92,29 @@ const App = () => {
           }} />
           <span>Restoring session...</span>
         </div>
+
+        <button
+          onClick={() => {
+            useAuthStore.getState().logout();
+            setIsInitializing(false);
+          }}
+          style={{
+            marginTop: '24px',
+            padding: '8px 16px',
+            backgroundColor: 'transparent',
+            border: '1px solid var(--c-border)',
+            borderRadius: 'var(--r-md)',
+            color: 'var(--c-text-muted)',
+            fontSize: '0.75rem',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+          onMouseOver={e => { e.target.style.borderColor = 'var(--c-accent)'; e.target.style.color = 'var(--c-text)'; }}
+          onMouseOut={e => { e.target.style.borderColor = 'var(--c-border)'; e.target.style.color = 'var(--c-text-muted)'; }}
+        >
+          Taking too long? Click to reset session
+        </button>
+
         <style>{`
           @keyframes spin { to { transform: rotate(360deg); } }
         `}</style>
