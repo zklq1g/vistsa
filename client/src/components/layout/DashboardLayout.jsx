@@ -45,8 +45,6 @@ const SidebarItem = ({ icon: Icon, label, to, isCollapsed, onClick }) => (
 
 const DashboardLayout = ({ requireAdmin = false }) => {
     const { user, logout } = useAuthStore();
-    const safeNormalize = (r) => r?.toString().replace(/[\s_]/g, '').toUpperCase() || '';
-    const userRole = safeNormalize(user?.role);
     const navigate = useNavigate();
     const location = useLocation();
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -81,7 +79,7 @@ const DashboardLayout = ({ requireAdmin = false }) => {
         { icon: Users, label: 'Manage Members', to: '/admin/members' },
         { icon: Calendar, label: 'Manage Events', to: '/admin/events' },
         { icon: BookOpen, label: 'Study Resources', to: '/admin/study' },
-        ...(userRole === 'SYSTEMADMIN' ? [{ icon: BarChart, label: 'Homepage Stats', to: '/admin/stats' }] : []),
+        { icon: BarChart2, label: 'Homepage Stats', to: '/admin/stats' },
     ] : [
         { icon: FolderGit2, label: 'Projects', to: '/dashboard' },
         { icon: Trophy, label: 'Leaderboard', to: '/dashboard/leaderboard' },

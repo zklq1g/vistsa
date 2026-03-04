@@ -5,17 +5,13 @@ import toast from 'react-hot-toast';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import { Plus, Minus, RotateCcw } from 'lucide-react';
-import { useAuthStore } from '../../store/authStore';
 
 const AdminLeaderboard = () => {
     const queryClient = useQueryClient();
-    const user = useAuthStore(state => state.user);
-    const isSystemAdmin = user?.role === 'SYSTEM_ADMIN';
-
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState('');
     const [points, setPoints] = useState(10);
-    const [isDeduct, setIsDeduct] = useState(false);
+    const [isDeduct, setIsDeduct] = useState(false); // true = deduct mode
     const [reason, setReason] = useState('');
 
     const [isResetModalOpen, setIsResetModalOpen] = useState(false);
@@ -31,6 +27,7 @@ const AdminLeaderboard = () => {
         queryFn: () => api.get('/leaderboard').then(res => res.data)
     });
 
+    // Normalise response shapes — API wraps data in .data sometimes
     const users = usersRes?.data ?? usersRes ?? [];
     const leaderboard = leaderboardRes?.data ?? leaderboardRes ?? [];
 
@@ -48,11 +45,11 @@ const AdminLeaderboard = () => {
     });
 
     const resetMutation = useMutation({
-        mutationFn: (password) => api.post('/leaderboard/reset', { password }),
+        mutationFn: () => api.post('/leaderboard/reset'),
         onSuccess: (res) => {
             queryClient.invalidateQueries(['admin-leaderboard']);
             const count = res.data?.count || 0;
-            toast.success(`Leaderboard cleared successfully. ${count} records removed.`);
+            toast.success(`Leaderboard reset successfully for ${count} members.`);
             setIsResetModalOpen(false);
             setResetConfirmText('');
         },
@@ -76,13 +73,13 @@ const AdminLeaderboard = () => {
 
     const handleReset = (e) => {
         e.preventDefault();
-        if (!resetConfirmText.trim()) {
-            return toast.error('Please enter your password to confirm');
+        if (resetConfirmText.trim().toUpperCase() !== 'RESET') {
+            return toast.error('Type RESET to confirm');
         }
-        resetMutation.mutate(resetConfirmText);
+        resetMutation.mutate();
     };
 
-    if (lbLoading) return <div style={{ color: 'var(--c-text-muted)' }}>Loading leaderboard...</div>;
+    if (usersLoading || lbLoading) return <div style={{ color: 'var(--c-text-muted)' }}>Loading...</div>;
 
     return (
         <div>
@@ -92,11 +89,9 @@ const AdminLeaderboard = () => {
                     <p style={{ color: 'var(--c-text-muted)' }}>Award or deduct points per member for hackathons, papers, and contributions.</p>
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
-                    {isSystemAdmin && (
-                        <Button variant="ghost" onClick={() => setIsResetModalOpen(true)}>
-                            <RotateCcw size={16} color="#f85149" /> <span style={{ color: '#f85149' }}>Reset Season</span>
-                        </Button>
-                    )}
+                    <Button variant="ghost" onClick={() => setIsResetModalOpen(true)}>
+                        <RotateCcw size={16} color="#f85149" /> <span style={{ color: '#f85149' }}>Reset Season</span>
+                    </Button>
                     <Button variant="ghost" onClick={() => openModal(true)} style={{ borderColor: '#f85149', color: '#f85149' }}>
                         <Minus size={18} /> Deduct
                     </Button>
@@ -107,6 +102,7 @@ const AdminLeaderboard = () => {
             </div>
 
             <div style={{ backgroundColor: 'var(--c-surface)', borderRadius: 'var(--r-md)', border: '1px solid var(--c-border)', overflow: 'hidden' }}>
+                {/* Table header */}
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: '48px 1fr 120px 100px',
@@ -156,12 +152,13 @@ const AdminLeaderboard = () => {
                 ))}
             </div>
 
+            {/* ADD / DEDUCT POINTS MODAL */}
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={isDeduct ? 'Deduct Points' : 'Award Points'}>
                 <form onSubmit={handleUpdatePoints} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
                     {isDeduct && (
                         <div style={{ backgroundColor: 'rgba(248,81,73,0.08)', border: '1px solid rgba(248,81,73,0.2)', borderRadius: 'var(--r-md)', padding: 'var(--space-md)' }}>
                             <p style={{ color: '#f85149', margin: 0, fontSize: '0.875rem' }}>
-                                You are about to <strong>deduct</strong> points from a member.
+                                You are about to <strong>deduct</strong> points from a member. This will reduce their ranking.
                             </p>
                         </div>
                     )}
@@ -180,13 +177,15 @@ const AdminLeaderboard = () => {
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem' }}>Points</label>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem' }}>
+                            Points to {isDeduct ? 'Deduct' : 'Add'}
+                        </label>
                         <input
                             type="number"
                             min="1"
                             value={points}
                             onChange={e => setPoints(e.target.value)}
-                            style={{ width: '100%', padding: '10px', borderRadius: 'var(--r-md)', backgroundColor: 'var(--c-surface-2)', color: 'var(--c-text)', border: '1px solid var(--c-border)' }}
+                            style={{ width: '100%', padding: '10px', borderRadius: 'var(--r-md)', backgroundColor: 'var(--c-surface-2)', color: 'var(--c-text)', border: '1px solid var(--c-border)', cursor: 'text' }}
                         />
                     </div>
 
@@ -196,35 +195,50 @@ const AdminLeaderboard = () => {
                             type="text"
                             value={reason}
                             onChange={e => setReason(e.target.value)}
-                            placeholder="e.g. Won 1st place"
-                            style={{ width: '100%', padding: '10px', borderRadius: 'var(--r-md)', backgroundColor: 'var(--c-surface-2)', color: 'var(--c-text)', border: '1px solid var(--c-border)' }}
+                            placeholder={isDeduct ? "e.g. Penalty for violation" : "e.g. Won 1st place at Hackathon"}
+                            style={{ width: '100%', padding: '10px', borderRadius: 'var(--r-md)', backgroundColor: 'var(--c-surface-2)', color: 'var(--c-text)', border: '1px solid var(--c-border)', cursor: 'text' }}
                         />
                     </div>
 
-                    <Button type="submit" variant={isDeduct ? 'ghost' : 'primary'} disabled={addPointsMutation.isPending} style={{ marginTop: 'var(--space-sm)' }}>
-                        {addPointsMutation.isPending ? 'Processing...' : (isDeduct ? 'Deduct' : 'Award Points')}
+                    <Button
+                        type="submit"
+                        variant={isDeduct ? 'ghost' : 'primary'}
+                        disabled={addPointsMutation.isPending}
+                        style={isDeduct ? { marginTop: 'var(--space-sm)', borderColor: '#f85149', color: '#f85149' } : { marginTop: 'var(--space-sm)' }}
+                    >
+                        {addPointsMutation.isPending ? 'Processing...' : (isDeduct ? 'Deduct Points' : 'Award Points')}
                     </Button>
                 </form>
             </Modal>
 
-            <Modal isOpen={isResetModalOpen} onClose={() => { setIsResetModalOpen(false); setResetConfirmText(''); }} title="Reset Leaderboard">
+            {/* RESET MODAL */}
+            <Modal isOpen={isResetModalOpen} onClose={() => { setIsResetModalOpen(false); setResetConfirmText(''); }} title="Reset Leaderboard Season">
                 <div style={{ backgroundColor: 'rgba(248, 81, 73, 0.1)', border: '1px solid rgba(248, 81, 73, 0.2)', padding: 'var(--space-md)', borderRadius: 'var(--r-md)', marginBottom: 'var(--space-lg)' }}>
                     <p style={{ color: '#f85149', margin: 0, fontSize: '0.875rem' }}>
-                        <strong>DANGER:</strong> This will delete all leaderboard entries.
+                        <strong>WARNING:</strong> This will set all member points to zero. This is typically done at the end of an academic year. This action cannot be undone.
                     </p>
                 </div>
                 <form onSubmit={handleReset} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
                     <div>
-                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem' }}>Enter Admin Password</label>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem' }}>
+                            Type <strong style={{ color: '#f85149', fontFamily: 'var(--font-mono)' }}>RESET</strong> to confirm
+                        </label>
                         <input
-                            type="password"
+                            type="text"
                             value={resetConfirmText}
                             onChange={e => setResetConfirmText(e.target.value)}
-                            style={{ width: '100%', padding: '10px', borderRadius: 'var(--r-md)', backgroundColor: 'var(--c-surface-2)', color: 'var(--c-text)', border: '1px solid var(--c-border)' }}
+                            placeholder="Type RESET here..."
+                            autoComplete="off"
+                            style={{ width: '100%', padding: '10px', borderRadius: 'var(--r-md)', backgroundColor: 'var(--c-surface-2)', color: 'var(--c-text)', border: `1px solid ${resetConfirmText.toUpperCase() === 'RESET' ? '#f85149' : 'var(--c-border)'}`, cursor: 'text', fontFamily: 'var(--font-mono)' }}
                         />
                     </div>
-                    <Button type="submit" variant="secondary" disabled={resetMutation.isPending || !resetConfirmText.trim()} style={{ color: '#f85149', borderColor: '#f85149' }}>
-                        {resetMutation.isPending ? 'Resetting...' : 'Wipe Leaderboard'}
+                    <Button
+                        type="submit"
+                        variant="secondary"
+                        disabled={resetMutation.isPending || resetConfirmText.trim().toUpperCase() !== 'RESET'}
+                        style={{ marginTop: 'var(--space-sm)', borderColor: '#f85149', color: '#f85149' }}
+                    >
+                        {resetMutation.isPending ? 'Resetting...' : 'Permanently Reset Leaderboard'}
                     </Button>
                 </form>
             </Modal>

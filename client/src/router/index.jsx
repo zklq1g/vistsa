@@ -26,11 +26,9 @@ import AdminStats from '../pages/admin/ManageStats';
 import Home from '../pages/public/Home';
 
 const AppRouter = () => {
-    const location = useLocation();
-
     return (
         <AnimatePresence mode="wait">
-            <Routes location={location} key={location.pathname}>
+            <Routes>
                 {/* PUBLIC ROUTES */}
                 <Route element={<PublicLayout />}>
                     <Route path="/" element={<Home />} />
@@ -42,7 +40,7 @@ const AppRouter = () => {
                 <Route
                     path="/dashboard"
                     element={
-                        <ProtectedRoute allowedRoles={['MEMBER', 'ADMIN', 'SYSTEM_ADMIN']}>
+                        <ProtectedRoute allowedRoles={['MEMBER', 'SYSTEM ADMIN']}>
                             <DashboardLayout requireAdmin={false} />
                         </ProtectedRoute>
                     }
@@ -57,7 +55,7 @@ const AppRouter = () => {
                 <Route
                     path="/admin"
                     element={
-                        <ProtectedRoute allowedRoles={['ADMIN', 'SYSTEM_ADMIN']}>
+                        <ProtectedRoute allowedRoles={['SYSTEM ADMIN']}>
                             <DashboardLayout requireAdmin={true} />
                         </ProtectedRoute>
                     }
@@ -69,9 +67,6 @@ const AppRouter = () => {
                     <Route path="study" element={<AdminStudy />} />
                     <Route path="stats" element={<AdminStats />} />
                 </Route>
-
-                {/* CATCH ALL */}
-                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </AnimatePresence>
     );

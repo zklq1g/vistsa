@@ -29,10 +29,7 @@ const Login = () => {
                 login(response.data.user, response.data.token);
                 toast.success(`Welcome back, ${response.data.user.displayName}`);
 
-                const safeNormalize = (r) => r?.toString().replace(/[\s_]/g, '').toUpperCase() || '';
-                const role = safeNormalize(response.data.user.role);
-
-                if (role === 'ADMIN' || role === 'SYSTEMADMIN') {
+                if (response.data.user.role === 'SYSTEM ADMIN') {
                     navigate('/admin');
                 } else {
                     navigate('/dashboard');

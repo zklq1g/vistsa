@@ -39,7 +39,7 @@ class ProjectController {
             }
 
             // If submitter is admin, auto-approve
-            const isApproved = req.user.role === 'ADMIN';
+            const isApproved = req.user.role === 'SYSTEM ADMIN';
 
             const project = await projectRepository.create({
                 title,
@@ -65,7 +65,7 @@ class ProjectController {
             const updateData = { ...req.body };
 
             // Prevent non-admins from modifying approval or pin status
-            if (req.user.role !== 'ADMIN') {
+            if (req.user.role !== 'SYSTEM ADMIN') {
                 delete updateData.isApproved;
                 delete updateData.isPinned;
             }

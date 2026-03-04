@@ -1,4 +1,3 @@
-// Reverting to stable baseline to debug System Admin black screen.
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -6,7 +5,6 @@ import { Toaster } from 'react-hot-toast';
 import { LazyMotion, domAnimation } from 'framer-motion';
 import AppRouter from './router';
 import CursorFollower from './components/layout/CursorFollower';
-import ErrorBoundary from './components/layout/ErrorBoundary';
 
 // Design system styles
 import './styles/tokens.css';
@@ -29,11 +27,9 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <CursorFollower />
-        <ErrorBoundary>
-          <LazyMotion features={domAnimation}>
-            <AppRouter />
-          </LazyMotion>
-        </ErrorBoundary>
+        <LazyMotion features={domAnimation}>
+          <AppRouter />
+        </LazyMotion>
       </BrowserRouter>
 
       <Toaster
