@@ -16,7 +16,8 @@ import {
     BarChart2,
     Menu,
     X,
-    ShieldCheck
+    ShieldCheck,
+    LayoutDashboard
 } from 'lucide-react';
 
 const SidebarItem = ({ icon: Icon, label, to, isCollapsed, onClick }) => (
