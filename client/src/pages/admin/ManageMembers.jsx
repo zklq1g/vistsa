@@ -6,9 +6,11 @@ import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Badge from '../../components/ui/Badge';
 import { UserPlus, Settings2, Trash2 } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
 
 const AdminMembers = () => {
     const queryClient = useQueryClient();
+    const { user: currentUser } = useAuthStore(); // Get current admin user for hierarchy checks
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
@@ -143,11 +145,10 @@ const AdminMembers = () => {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => {
-                                    setSelectedUser(user);
-                                    setNewRole(user.role);
+                                    setEditingUser(user);
                                     setIsEditModalOpen(true);
                                 }}
-                                disabled={user.role === 'SYSTEM_ADMIN' || (currentUser.role === 'ADMIN' && user.role === 'ADMIN')}
+                                disabled={user.role === 'SYSTEM_ADMIN' || (currentUser?.role === 'ADMIN' && user.role === 'ADMIN')}
                             >
                                 <Settings2 size={16} />
                             </Button>
@@ -159,7 +160,7 @@ const AdminMembers = () => {
                                         toggleStatusMutation.mutate(user.id);
                                     }
                                 }}
-                                disabled={toggleStatusMutation.isPending || user.role === 'SYSTEM_ADMIN' || (currentUser.role === 'ADMIN' && user.role === 'ADMIN')}
+                                disabled={toggleStatusMutation.isPending || user.role === 'SYSTEM_ADMIN' || (currentUser?.role === 'ADMIN' && user.role === 'ADMIN')}
                                 title={user.isActive ? 'Disable User' : 'Enable User'}
                                 style={{
                                     width: '36px',
@@ -168,11 +169,11 @@ const AdminMembers = () => {
                                     backgroundColor: user.isActive ? '#3fb950' : 'var(--c-surface-3)',
                                     position: 'relative',
                                     border: '1px solid var(--c-border)',
-                                    cursor: (user.role === 'SYSTEM_ADMIN' || (currentUser.role === 'ADMIN' && user.role === 'ADMIN')) ? 'not-allowed' : 'pointer',
+                                    cursor: (user.role === 'SYSTEM_ADMIN' || (currentUser?.role === 'ADMIN' && user.role === 'ADMIN')) ? 'not-allowed' : 'pointer',
                                     padding: 0,
                                     margin: '0 8px',
                                     transition: 'background-color 0.2s',
-                                    opacity: (user.role === 'SYSTEM_ADMIN' || (currentUser.role === 'ADMIN' && user.role === 'ADMIN')) ? 0.5 : 1
+                                    opacity: (user.role === 'SYSTEM_ADMIN' || (currentUser?.role === 'ADMIN' && user.role === 'ADMIN')) ? 0.5 : 1
                                 }}
                             >
                                 <div style={{
@@ -192,10 +193,10 @@ const AdminMembers = () => {
                                 size="sm"
                                 onClick={() => {
                                     if (window.confirm(`Are you sure you want to PERMANENTLY delete ${user.username}? This cannot be undone.`)) {
-                                        deleteUserMutation.mutate(user.id);
+                                        hardDeleteMutation.mutate(user.id);
                                     }
                                 }}
-                                disabled={deleteUserMutation.isPending || user.role === 'SYSTEM_ADMIN' || (currentUser.role === 'ADMIN' && user.role === 'ADMIN')}
+                                disabled={hardDeleteMutation.isPending || user.role === 'SYSTEM_ADMIN' || (currentUser?.role === 'ADMIN' && user.role === 'ADMIN')}
                                 style={{ color: '#f85149' }}
                             >
                                 <Trash2 size={16} />
