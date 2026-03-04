@@ -1,31 +1,26 @@
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Points, PointMaterial } from '@react-three/drei';
+import * as random from 'maath/random/dist/maath-random.esm';
 
 const ParticleField = (props) => {
     const ref = useRef();
 
-    // Generate uniform random points in a sphere (3 coordinates per point)
+    // Generate 5000 points (3 coords each) and filter out any NaN values
     const sphere = useMemo(() => {
-        const positions = new Float32Array(5000 * 3);
-        for (let i = 0; i < 5000; i++) {
-            const u = Math.random();
-            const v = Math.random();
-            const theta = 2 * Math.PI * u;
-            const phi = Math.acos(2 * v - 1);
-            const r = 1.5 * Math.cbrt(Math.random());
-
-            positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-            positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-            positions[i * 3 + 2] = r * Math.cos(phi);
+        const raw = random.inSphere(new Float32Array(5000 * 3), { radius: 1.5 });
+        // Replace any NaN produced by the library with 0 to avoid geometry errors
+        for (let i = 0; i < raw.length; i++) {
+            if (isNaN(raw[i])) raw[i] = 0;
         }
-        return positions;
+        return raw;
     }, []);
 
     useFrame((state, delta) => {
-        // Slow cinematic rotation
-        ref.current.rotation.x -= delta / 10;
-        ref.current.rotation.y -= delta / 15;
+        if (ref.current) {
+            ref.current.rotation.x -= delta / 10;
+            ref.current.rotation.y -= delta / 15;
+        }
     });
 
     return (
@@ -33,7 +28,7 @@ const ParticleField = (props) => {
             <Points ref={ref} positions={sphere} stride={3} frustumCulled={false} {...props}>
                 <PointMaterial
                     transparent
-                    color="#d4c5a9" // c-accent
+                    color="#d4c5a9"
                     size={0.005}
                     sizeAttenuation={true}
                     depthWrite={false}
@@ -47,7 +42,14 @@ const ParticleField = (props) => {
 const ThreejsBackground = () => {
     return (
         <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }}>
-            <Canvas camera={{ position: [0, 0, 1] }}>
+            <Canvas
+                camera={{ position: [0, 0, 1] }}
+                onCreated={({ gl }) => {
+                    gl.domElement.addEventListener('webglcontextlost', (e) => {
+                        e.preventDefault();
+                    }, false);
+                }}
+            >
                 <ParticleField />
             </Canvas>
             {/* Vignette overlay for depth */}
@@ -62,3 +64,4 @@ const ThreejsBackground = () => {
 };
 
 export default ThreejsBackground;
+

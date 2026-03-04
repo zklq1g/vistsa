@@ -9,8 +9,8 @@ import { useAuthStore } from '../../store/authStore';
 import { CalendarPlus, Trash2, MapPin } from 'lucide-react';
 
 const AdminEvents = () => {
-    const { user: currentUser } = useAuthStore();
     const queryClient = useQueryClient();
+    const currentUser = useAuthStore(state => state.user);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         title: '',

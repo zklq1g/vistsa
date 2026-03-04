@@ -8,8 +8,8 @@ import { Plus, Minus, RotateCcw } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
 const AdminLeaderboard = () => {
-    const { user: currentUser } = useAuthStore();
     const queryClient = useQueryClient();
+    const currentUser = useAuthStore(state => state.user);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState('');
     const [points, setPoints] = useState(10);

@@ -21,8 +21,8 @@ const getCategoryBadgeColor = (category) => {
 };
 
 const AdminStudy = () => {
-    const { user: currentUser } = useAuthStore();
     const queryClient = useQueryClient();
+    const currentUser = useAuthStore(state => state.user);
     const [tab, setTab] = useState('pending'); // 'pending' | 'all'
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({

@@ -9,9 +9,9 @@ import { Check, X, ExternalLink, Github, Pin, Eye, Calendar, User } from 'lucide
 import { useAuthStore } from '../../store/authStore';
 
 const AdminApprovalQueue = () => {
-    const { user: currentUser } = useAuthStore();
     const queryClient = useQueryClient();
     const [selectedProject, setSelectedProject] = useState(null);
+    const currentUser = useAuthStore(state => state.user);
 
     const { data: response, isLoading } = useQuery({
         queryKey: ['admin-projects'],

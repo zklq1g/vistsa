@@ -9,8 +9,8 @@ import { useAuthStore } from '../../store/authStore';
 import { UserPlus, Settings2, Trash2, Users } from 'lucide-react';
 
 const AdminMembers = () => {
-    const { user: currentUser } = useAuthStore();
     const queryClient = useQueryClient();
+    const currentUser = useAuthStore(state => state.user);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
@@ -198,7 +198,7 @@ const AdminMembers = () => {
                                     disabled={hardDeleteMutation.isPending || user.id === currentUser?.id}
                                     title="Permanently Delete"
                                 >
-                                    <Trash2 size={16} color={user.id === useAuthStore.getState().user?.id ? 'var(--c-text-muted)' : '#f85149'} />
+                                    <Trash2 size={16} color={user.id === currentUser?.id ? 'var(--c-text-muted)' : '#f85149'} />
                                 </Button>
                             )}
                         </div>
