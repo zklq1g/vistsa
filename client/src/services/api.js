@@ -29,18 +29,32 @@ api.interceptors.response.use(
         const status = error.response?.status;
         const message = error.response?.data?.message || 'Something went wrong';
 
+        if (status === 401) {
+            // Auto logout on token expiration
+            useAuthStore.getState().logout();
+            if (window.location.pathname !== '/login') {
+                toast.error('Session expired. Please log in again.');
+                window.location.href = '/login';
+            }
+        } else {
+            // Unhandled 400, 403, or 500+ series errors trigger the Global Error Modal
+            let toastMsg = message;
+            if (status === 403) toastMsg = 'Permission denied. Details in popup.';
+            if (status >= 500) toastMsg = 'Server error. Details in popup.';
 
-        // Push full debug info to the global error store to show the modal
-        useErrorStore.getState().showError({
-            status,
-            message,
-            endpoint: error.config?.url,
-            method: error.config?.method,
-            raw: error.response?.data || error.message
-        });
-    }
+            toast.error(toastMsg);
 
-return Promise.reject(error.response?.data || { message });
+            // Push full debug info to the global error store to show the modal
+            useErrorStore.getState().showError({
+                status,
+                message,
+                endpoint: error.config?.url,
+                method: error.config?.method,
+                raw: error.response?.data || error.message
+            });
+        }
+
+        return Promise.reject(error.response?.data || { message });
     }
 );
 
