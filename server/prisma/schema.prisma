@@ -52,7 +52,7 @@ model Project {
   isApproved    Boolean       @default(false)   // false until admin approves
   sortOrder     Int           @default(0)       // for future manual ordering
   submittedById String
-  submittedBy   User          @relation("Submitter", fields: [submittedById], references: [id])
+  submittedBy   User          @relation("Submitter", fields: [submittedById], references: [id], onDelete: Cascade)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
@@ -68,7 +68,7 @@ model ProjectMember {
   projectId String
   userId    String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user      User    @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, userId])   // prevent duplicate membership
 }
@@ -79,7 +79,7 @@ model ProjectMember {
 model LeaderboardEntry {
   id          String   @id @default(cuid())
   userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   points      Int      @default(0)
   // projectCount is computed from JOIN — not stored
   lastUpdated DateTime @updatedAt
@@ -98,7 +98,7 @@ model Event {
   registrationUrl String?
   isPublished Boolean   @default(false)
   createdById String
-  createdBy   User      @relation(fields: [createdById], references: [id])
+  createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
@@ -115,7 +115,7 @@ model StudyMaterial {
   category    String            // "ROADMAP", "PAPER", "TUTORIAL", "RESOURCE", "OTHER"
   status      String            @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
   uploadedById String
-  uploadedBy  User              @relation(fields: [uploadedById], references: [id])
+  uploadedBy  User              @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
   createdAt   DateTime          @default(now())
 }
 

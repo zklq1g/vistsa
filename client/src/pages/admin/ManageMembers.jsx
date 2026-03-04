@@ -141,9 +141,7 @@ const AdminMembers = () => {
                                 <Settings2 size={16} />
                             </Button>
 
-                            <Button
-                                variant="ghost"
-                                size="sm"
+                            <button
                                 onClick={() => {
                                     const action = user.isActive ? 'disable' : 'enable';
                                     if (window.confirm(`Are you sure you want to ${action} ${user.username}?`)) {
@@ -152,15 +150,30 @@ const AdminMembers = () => {
                                 }}
                                 disabled={toggleStatusMutation.isPending || user.role === 'ADMIN'}
                                 title={user.isActive ? 'Disable User' : 'Enable User'}
+                                style={{
+                                    width: '36px',
+                                    height: '20px',
+                                    borderRadius: '10px',
+                                    backgroundColor: user.isActive ? '#3fb950' : 'var(--c-surface-3)',
+                                    position: 'relative',
+                                    border: '1px solid var(--c-border)',
+                                    cursor: user.role === 'ADMIN' ? 'not-allowed' : 'pointer',
+                                    padding: 0,
+                                    margin: '0 8px',
+                                    transition: 'background-color 0.2s'
+                                }}
                             >
                                 <div style={{
-                                    width: '12px',
-                                    height: '12px',
+                                    width: '14px',
+                                    height: '14px',
                                     borderRadius: '50%',
-                                    backgroundColor: user.isActive ? '#3fb950' : 'var(--c-text-muted)',
-                                    border: '2px solid var(--c-border)'
+                                    backgroundColor: '#fff',
+                                    position: 'absolute',
+                                    top: '2px',
+                                    left: user.isActive ? '18px' : '2px',
+                                    transition: 'left 0.2s'
                                 }} />
-                            </Button>
+                            </button>
 
                             <Button
                                 variant="ghost"

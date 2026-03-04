@@ -46,9 +46,10 @@ const AdminLeaderboard = () => {
 
     const resetMutation = useMutation({
         mutationFn: () => api.delete('/leaderboard/reset'),
-        onSuccess: () => {
+        onSuccess: (res) => {
             queryClient.invalidateQueries(['admin-leaderboard']);
-            toast.success('Leaderboard has been completely reset.');
+            const count = res.data?.count || 0;
+            toast.success(`Leaderboard reset successfully for ${count} members.`);
             setIsResetModalOpen(false);
             setResetConfirmText('');
         },

@@ -56,8 +56,8 @@ class LeaderboardController {
         try {
             // Admin auth is already enforced by requireAdmin middleware on this route.
             // No secondary password required — that env var was often unset, causing permanent 403.
-            await prisma.leaderboardEntry.updateMany({ data: { points: 0 } });
-            return sendSuccess(res, null, 'Leaderboard reset successfully');
+            const result = await prisma.leaderboardEntry.updateMany({ data: { points: 0 } });
+            return sendSuccess(res, { count: result.count }, `Leaderboard reset successfully for ${result.count} members`);
         } catch (error) {
             return sendError(res, error.message, 500);
         }
