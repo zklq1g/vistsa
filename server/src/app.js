@@ -29,4 +29,9 @@ app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'ok', message: 'VISTA API is running smoothly.' });
 });
 
+// 404 catch-all for unknown API routes
+app.use('/api/*', (req, res) => {
+    res.status(404).json({ success: false, message: `Route not found: ${req.method} ${req.originalUrl}` });
+});
+
 module.exports = app;

@@ -36,6 +36,10 @@ api.interceptors.response.use(
                 toast.error('Session expired. Please log in again.');
                 window.location.href = '/login';
             }
+        } else if (status === 404) {
+            // 404s are expected for some calls (e.g. /auth/me with expired token).
+            // Don't show a toast or modal — just silently reject.
+            console.warn(`VISTA: 404 on ${error.config?.method?.toUpperCase()} ${error.config?.url}`);
         } else {
             // Unhandled 400, 403, or 500+ series errors trigger the Global Error Modal
             let toastMsg = message;
