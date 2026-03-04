@@ -1,5 +1,11 @@
 import { create } from 'zustand';
 
+export const normalizeRole = (role) => {
+    if (!role) return '';
+    // Remove underscores/spaces and convert to uppercase: "SYSTEM_ADMIN" -> "SYSTEMADMIN"
+    return role.toString().replace(/[\s_]/g, '').toUpperCase();
+};
+
 const getInitialUser = () => {
     try {
         const saved = localStorage.getItem('vista_user');

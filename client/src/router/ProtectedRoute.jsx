@@ -11,8 +11,23 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-        // Role not allowed (e.g. member trying to access /admin)
+    const { normalizeRole } = useAuthStore.getState ? { normalizeRole: (r) => r?.toString().replace(/[\s_]/g, '').toUpperCase() } : {};
+    const safeNormalize = (r) => r?.toString().replace(/[\s_]/g, '').toUpperCase() || '';
+
+    const userRole = safeNormalize(user?.role);
+    const normalizedAllowed = (allowedRoles || []).map(r => safeNormalize(r));
+
+    if (allowedRoles && user && !normalizedAllowed.includes(userRole)) {
+        // Prevent infinite loop: if already at /dashboard, don't redirect there again
+        if (location.pathname === '/dashboard') {
+            console.error("Access denied at dashboard root for role:", userRole);
+            return (
+                <div style={{ padding: '20px', color: 'white', textAlign: 'center' }}>
+                    <h2>Access Denied</h2>
+                    <p>Your role ({user.role}) is not authorized for this section.</p>
+                </div>
+            );
+        }
         return <Navigate to="/dashboard" replace />;
     }
 
