@@ -131,7 +131,7 @@ const AdminMembers = () => {
                         </div>
                         <div style={{ color: 'var(--c-text-muted)', fontFamily: 'var(--font-mono)', fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.username}</div>
                         <div>
-                            <Badge variant={user.role === 'SYSTEM ADMIN' ? 'accent' : 'neutral'}>{user.role}</Badge>
+                            <Badge variant={user.role === 'ADMIN' ? 'accent' : 'neutral'}>{user.role}</Badge>
                         </div>
                         <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end', alignItems: 'center' }}>
                             <Button
@@ -153,7 +153,7 @@ const AdminMembers = () => {
                                         toggleStatusMutation.mutate(user.id);
                                     }
                                 }}
-                                disabled={toggleStatusMutation.isPending || user.role === 'SYSTEM ADMIN'}
+                                disabled={toggleStatusMutation.isPending || user.role === 'ADMIN'}
                                 title={user.isActive ? 'Disable User' : 'Enable User'}
                                 style={{
                                     width: '34px',
@@ -162,7 +162,7 @@ const AdminMembers = () => {
                                     backgroundColor: user.isActive ? '#3fb950' : 'var(--c-surface-3)',
                                     position: 'relative',
                                     border: '1px solid var(--c-border)',
-                                    cursor: user.role === 'SYSTEM ADMIN' ? 'not-allowed' : 'pointer',
+                                    cursor: user.role === 'ADMIN' ? 'not-allowed' : 'pointer',
                                     padding: 0,
                                     margin: '0 4px',
                                     transition: 'background-color 0.2s',
@@ -189,10 +189,10 @@ const AdminMembers = () => {
                                         hardDeleteMutation.mutate(user.id);
                                     }
                                 }}
-                                disabled={hardDeleteMutation.isPending || user.role === 'SYSTEM ADMIN'}
+                                disabled={hardDeleteMutation.isPending || user.role === 'ADMIN'}
                                 title="Permanently Delete"
                             >
-                                <Trash2 size={16} color={user.role === 'SYSTEM ADMIN' ? 'var(--c-text-muted)' : '#f85149'} />
+                                <Trash2 size={16} color={user.role === 'ADMIN' ? 'var(--c-text-muted)' : '#f85149'} />
                             </Button>
                         </div>
                     </div>

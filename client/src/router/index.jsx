@@ -40,7 +40,7 @@ const AppRouter = () => {
                 <Route
                     path="/dashboard"
                     element={
-                        <ProtectedRoute allowedRoles={['MEMBER', 'SYSTEM ADMIN']}>
+                        <ProtectedRoute allowedRoles={['MEMBER', 'ADMIN']}>
                             <DashboardLayout requireAdmin={false} />
                         </ProtectedRoute>
                     }
@@ -55,7 +55,7 @@ const AppRouter = () => {
                 <Route
                     path="/admin"
                     element={
-                        <ProtectedRoute allowedRoles={['SYSTEM ADMIN']}>
+                        <ProtectedRoute allowedRoles={['ADMIN']}>
                             <DashboardLayout requireAdmin={true} />
                         </ProtectedRoute>
                     }

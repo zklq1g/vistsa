@@ -13,7 +13,7 @@ async function main() {
             username: 'admin',
             password: hashedPassword,
             displayName: 'System Admin',
-            role: 'SYSTEM ADMIN',
+            role: 'ADMIN',
         },
     });
 
