@@ -102,7 +102,7 @@ const AdminMembers = () => {
             <div style={{ backgroundColor: 'var(--c-surface)', borderRadius: 'var(--r-md)', border: '1px solid var(--c-border)', overflow: 'hidden' }}>
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'minmax(200px, 1fr) 150px 100px 120px',
+                    gridTemplateColumns: '1.5fr 1fr 140px 140px',
                     padding: '16px 24px',
                     borderBottom: '1px solid var(--c-border)',
                     backgroundColor: 'var(--c-surface-2)',
@@ -113,32 +113,35 @@ const AdminMembers = () => {
                     <div>Member</div>
                     <div>Username</div>
                     <div>Role</div>
-                    <div style={{ textAlign: 'center' }}>Actions</div>
+                    <div style={{ textAlign: 'right' }}>Actions</div>
                 </div>
 
                 {users?.map((user) => (
                     <div key={user.id} style={{
                         display: 'grid',
-                        gridTemplateColumns: 'minmax(200px, 1fr) 150px 100px 120px',
+                        gridTemplateColumns: '1.5fr 1fr 140px 140px',
                         padding: '16px 24px',
                         borderBottom: '1px solid var(--c-border)',
                         alignItems: 'center',
                         opacity: user.isActive ? 1 : 0.6
                     }}>
-                        <div style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {user.displayName}
                             {!user.isActive && <Badge variant="neutral" size="sm">DISABLED</Badge>}
                         </div>
-                        <div style={{ color: 'var(--c-text-muted)', fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}>{user.username}</div>
+                        <div style={{ color: 'var(--c-text-muted)', fontFamily: 'var(--font-mono)', fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.username}</div>
                         <div>
                             <Badge variant={user.role === 'SYSTEM ADMIN' ? 'accent' : 'neutral'}>{user.role}</Badge>
                         </div>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end', alignItems: 'center' }}>
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => openModal(user)}
-                                title="Edit Role"
+                                onClick={() => {
+                                    setEditingUser(user);
+                                    setIsEditModalOpen(true);
+                                }}
+                                title="Reset Password / Edit"
                             >
                                 <Settings2 size={16} />
                             </Button>
@@ -153,21 +156,22 @@ const AdminMembers = () => {
                                 disabled={toggleStatusMutation.isPending || user.role === 'SYSTEM ADMIN'}
                                 title={user.isActive ? 'Disable User' : 'Enable User'}
                                 style={{
-                                    width: '36px',
-                                    height: '20px',
-                                    borderRadius: '10px',
+                                    width: '34px',
+                                    height: '18px',
+                                    borderRadius: '9px',
                                     backgroundColor: user.isActive ? '#3fb950' : 'var(--c-surface-3)',
                                     position: 'relative',
                                     border: '1px solid var(--c-border)',
                                     cursor: user.role === 'SYSTEM ADMIN' ? 'not-allowed' : 'pointer',
                                     padding: 0,
-                                    margin: '0 8px',
-                                    transition: 'background-color 0.2s'
+                                    margin: '0 4px',
+                                    transition: 'background-color 0.2s',
+                                    flexShrink: 0
                                 }}
                             >
                                 <div style={{
-                                    width: '14px',
-                                    height: '14px',
+                                    width: '12px',
+                                    height: '12px',
                                     borderRadius: '50%',
                                     backgroundColor: '#fff',
                                     position: 'absolute',
@@ -238,7 +242,7 @@ const AdminMembers = () => {
                             style={styles.input}
                         >
                             <option value="MEMBER">Standard Member</option>
-                            <option value="ADMIN">Administrator</option>
+                            <option value="SYSTEM ADMIN">System Administrator</option>
                         </select>
                     </div>
 
