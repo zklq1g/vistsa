@@ -59,11 +59,24 @@ class AdminController {
         }
     }
 
-    async deleteUser(req, res) {
+    async toggleUserStatus(req, res) {
         try {
             const { id } = req.params;
-            await userRepository.update(id, { isActive: false }); // Soft disable
-            return sendSuccess(res, null, 'User disabled successfully');
+            const user = await userRepository.findById(id);
+            if (!user) return sendError(res, 'User not found', 404);
+
+            await userRepository.update(id, { isActive: !user.isActive });
+            return sendSuccess(res, null, `User ${!user.isActive ? 'enabled' : 'disabled'} successfully`);
+        } catch (error) {
+            return sendError(res, error.message, 500);
+        }
+    }
+
+    async permanentlyDeleteUser(req, res) {
+        try {
+            const { id } = req.params;
+            await userRepository.delete(id);
+            return sendSuccess(res, null, 'User permanently deleted');
         } catch (error) {
             return sendError(res, error.message, 500);
         }

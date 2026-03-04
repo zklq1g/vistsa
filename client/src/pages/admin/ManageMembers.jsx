@@ -37,13 +37,22 @@ const AdminMembers = () => {
         onError: (err) => toast.error(err.message || 'Failed to create account')
     });
 
-    const deleteMutation = useMutation({
-        mutationFn: (id) => api.delete(`/admin/users/${id}`),
+    const toggleStatusMutation = useMutation({
+        mutationFn: (id) => api.patch(`/admin/users/${id}/toggle-status`),
+        onSuccess: (res) => {
+            queryClient.invalidateQueries(['admin-users']);
+            toast.success(res.message || 'Status updated successfully');
+        },
+        onError: (err) => toast.error(err.message || 'Failed to update status')
+    });
+
+    const hardDeleteMutation = useMutation({
+        mutationFn: (id) => api.delete(`/admin/users/${id}/permanent`),
         onSuccess: () => {
             queryClient.invalidateQueries(['admin-users']);
-            toast.success('Member disabled successfully.');
+            toast.success('Member permanently removed.');
         },
-        onError: (err) => toast.error(err.message || 'Failed to disable member')
+        onError: (err) => toast.error(err.message || 'Failed to delete member')
     });
 
     const resetPasswordMutation = useMutation({
@@ -93,7 +102,7 @@ const AdminMembers = () => {
             <div style={{ backgroundColor: 'var(--c-surface)', borderRadius: 'var(--r-md)', border: '1px solid var(--c-border)', overflow: 'hidden' }}>
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'minmax(200px, 1fr) 150px 100px 80px',
+                    gridTemplateColumns: 'minmax(200px, 1fr) 150px 100px 120px',
                     padding: '16px 24px',
                     borderBottom: '1px solid var(--c-border)',
                     backgroundColor: 'var(--c-surface-2)',
@@ -110,32 +119,59 @@ const AdminMembers = () => {
                 {users?.map((user) => (
                     <div key={user.id} style={{
                         display: 'grid',
-                        gridTemplateColumns: 'minmax(200px, 1fr) 150px 100px 80px',
+                        gridTemplateColumns: 'minmax(200px, 1fr) 150px 100px 120px',
                         padding: '16px 24px',
                         borderBottom: '1px solid var(--c-border)',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        opacity: user.isActive ? 1 : 0.6
                     }}>
-                        <div style={{ fontWeight: 500 }}>{user.displayName}</div>
+                        <div style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {user.displayName}
+                            {!user.isActive && <Badge variant="neutral" size="sm">DISABLED</Badge>}
+                        </div>
                         <div style={{ color: 'var(--c-text-muted)', fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}>{user.username}</div>
                         <div>
                             <Badge variant={user.role === 'ADMIN' ? 'accent' : 'neutral'}>{user.role}</Badge>
                         </div>
-                        <div style={{ textAlign: 'center', display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                        <div style={{ textAlign: 'center', display: 'flex', gap: '6px', justifyContent: 'center' }}>
                             <Button variant="ghost" size="sm" onClick={() => {
                                 setEditingUser(user);
                                 setIsEditModalOpen(true);
-                            }}>
+                            }} title="Settings">
                                 <Settings2 size={16} />
                             </Button>
+
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => {
-                                    if (window.confirm(`Are you sure you want to disable ${user.username}?`)) {
-                                        deleteMutation.mutate(user.id);
+                                    const action = user.isActive ? 'disable' : 'enable';
+                                    if (window.confirm(`Are you sure you want to ${action} ${user.username}?`)) {
+                                        toggleStatusMutation.mutate(user.id);
                                     }
                                 }}
-                                disabled={deleteMutation.isPending || user.role === 'ADMIN'}
+                                disabled={toggleStatusMutation.isPending || user.role === 'ADMIN'}
+                                title={user.isActive ? 'Disable User' : 'Enable User'}
+                            >
+                                <div style={{
+                                    width: '12px',
+                                    height: '12px',
+                                    borderRadius: '50%',
+                                    backgroundColor: user.isActive ? '#3fb950' : 'var(--c-text-muted)',
+                                    border: '2px solid var(--c-border)'
+                                }} />
+                            </Button>
+
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    if (window.confirm(`CRITICAL: Are you sure you want to PERMANENTLY delete ${user.username}? This cannot be undone.`)) {
+                                        hardDeleteMutation.mutate(user.id);
+                                    }
+                                }}
+                                disabled={hardDeleteMutation.isPending || user.role === 'ADMIN'}
+                                title="Permanently Delete"
                             >
                                 <Trash2 size={16} color={user.role === 'ADMIN' ? 'var(--c-text-muted)' : '#f85149'} />
                             </Button>

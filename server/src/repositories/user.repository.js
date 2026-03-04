@@ -20,6 +20,10 @@ class UserRepository {
     async findAll() {
         return prisma.user.findMany({ select: { id: true, username: true, displayName: true, role: true, isActive: true } });
     }
+
+    async delete(id) {
+        return prisma.user.delete({ where: { id } });
+    }
 }
 
 module.exports = new UserRepository();

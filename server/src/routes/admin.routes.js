@@ -12,6 +12,7 @@ router.use(authMiddleware, requireAdmin);
 router.post('/users', adminController.createUser);
 router.get('/users', adminController.getAllUsers);
 router.patch('/users/:id/reset-password', adminController.resetUserPassword);
-router.delete('/users/:id', adminController.deleteUser);
+router.patch('/users/:id/toggle-status', adminController.toggleUserStatus);
+router.delete('/users/:id/permanent', adminController.permanentlyDeleteUser);
 
 module.exports = router;
