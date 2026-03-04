@@ -8,6 +8,7 @@ import { Plus, Minus, RotateCcw } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
 const AdminLeaderboard = () => {
+    const { user: currentUser } = useAuthStore();
     const queryClient = useQueryClient();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState('');
@@ -90,7 +91,7 @@ const AdminLeaderboard = () => {
                     <p style={{ color: 'var(--c-text-muted)' }}>Award or deduct points per member for hackathons, papers, and contributions.</p>
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
-                    {useAuthStore.getState().user?.role === 'ADMIN' && (
+                    {currentUser?.role === 'ADMIN' && (
                         <Button variant="ghost" onClick={() => setIsResetModalOpen(true)}>
                             <RotateCcw size={16} color="#f85149" /> <span style={{ color: '#f85149' }}>Reset Season</span>
                         </Button>

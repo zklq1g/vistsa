@@ -21,6 +21,7 @@ const getCategoryBadgeColor = (category) => {
 };
 
 const AdminStudy = () => {
+    const { user: currentUser } = useAuthStore();
     const queryClient = useQueryClient();
     const [tab, setTab] = useState('pending'); // 'pending' | 'all'
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -211,7 +212,7 @@ const AdminStudy = () => {
                                 {mat.fileUrl && <a href={mat.fileUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--c-text-muted)' }}><Download size={16} /></a>}
                             </div>
                             <div style={{ textAlign: 'center' }}>
-                                {useAuthStore.getState().user?.role === 'ADMIN' && (
+                                {currentUser?.role === 'ADMIN' && (
                                     <Button
                                         variant="ghost" size="sm"
                                         onClick={() => { if (window.confirm('Delete this resource?')) deleteMutation.mutate(mat.id); }}

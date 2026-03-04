@@ -9,6 +9,7 @@ import { useAuthStore } from '../../store/authStore';
 import { UserPlus, Settings2, Trash2, Users } from 'lucide-react';
 
 const AdminMembers = () => {
+    const { user: currentUser } = useAuthStore();
     const queryClient = useQueryClient();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
@@ -156,7 +157,7 @@ const AdminMembers = () => {
                                         toggleStatusMutation.mutate(user.id);
                                     }
                                 }}
-                                disabled={toggleStatusMutation.isPending || (user.role === 'ADMIN') || (useAuthStore.getState().user?.role === 'MOD' && user.role !== 'MEMBER')}
+                                disabled={toggleStatusMutation.isPending || (user.role === 'ADMIN') || (currentUser?.role === 'MOD' && user.role !== 'MEMBER')}
                                 title={user.isActive ? 'Disable User' : 'Enable User'}
                                 style={{
                                     width: '34px',
@@ -165,7 +166,7 @@ const AdminMembers = () => {
                                     backgroundColor: user.isActive ? '#3fb950' : 'var(--c-surface-3)',
                                     position: 'relative',
                                     border: '1px solid var(--c-border)',
-                                    cursor: (user.role === 'ADMIN' || (useAuthStore.getState().user?.role === 'MOD' && user.role !== 'MEMBER')) ? 'not-allowed' : 'pointer',
+                                    cursor: (user.role === 'ADMIN' || (currentUser?.role === 'MOD' && user.role !== 'MEMBER')) ? 'not-allowed' : 'pointer',
                                     padding: 0,
                                     margin: '0 4px',
                                     transition: 'background-color 0.2s',
@@ -185,7 +186,7 @@ const AdminMembers = () => {
                             </button>
 
                             {/* Delete strictly ADMIN only */}
-                            {useAuthStore.getState().user?.role === 'ADMIN' && (
+                            {currentUser?.role === 'ADMIN' && (
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -194,7 +195,7 @@ const AdminMembers = () => {
                                             hardDeleteMutation.mutate(user.id);
                                         }
                                     }}
-                                    disabled={hardDeleteMutation.isPending || user.id === useAuthStore.getState().user?.id}
+                                    disabled={hardDeleteMutation.isPending || user.id === currentUser?.id}
                                     title="Permanently Delete"
                                 >
                                     <Trash2 size={16} color={user.id === useAuthStore.getState().user?.id ? 'var(--c-text-muted)' : '#f85149'} />
@@ -209,7 +210,7 @@ const AdminMembers = () => {
                         <Users size={48} style={{ opacity: 0.15, margin: '0 auto 16px', display: 'block' }} />
                         <h3 style={{ color: 'var(--c-text)', marginBottom: '8px' }}>No Members Found</h3>
                         <p style={{ fontSize: '0.9rem', maxWidth: '300px', margin: '0 auto' }}>
-                            {useAuthStore.getState().user?.role === 'MOD'
+                            {currentUser?.role === 'MOD'
                                 ? "You only have permission to view and manage 'MEMBER' accounts."
                                 : "Currently there are no other member accounts in the system."}
                         </p>
@@ -260,7 +261,7 @@ const AdminMembers = () => {
                             style={styles.input}
                         >
                             <option value="MEMBER">Standard Member</option>
-                            {useAuthStore.getState().user?.role === 'ADMIN' && (
+                            {currentUser?.role === 'ADMIN' && (
                                 <option value="MOD">Moderator (MOD)</option>
                             )}
                         </select>

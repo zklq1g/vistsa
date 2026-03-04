@@ -9,6 +9,7 @@ import { Check, X, ExternalLink, Github, Pin, Eye, Calendar, User } from 'lucide
 import { useAuthStore } from '../../store/authStore';
 
 const AdminApprovalQueue = () => {
+    const { user: currentUser } = useAuthStore();
     const queryClient = useQueryClient();
     const [selectedProject, setSelectedProject] = useState(null);
 
@@ -87,7 +88,7 @@ const AdminApprovalQueue = () => {
 
                 {isPending ? (
                     <>
-                        {useAuthStore.getState().user?.role === 'ADMIN' && (
+                        {currentUser?.role === 'ADMIN' && (
                             <Button variant="ghost" size="sm" onClick={() => {
                                 if (window.confirm('Delete this submission permanently?')) deleteMutation.mutate(proj.id);
                             }} disabled={deleteMutation.isPending}>
@@ -103,7 +104,7 @@ const AdminApprovalQueue = () => {
                         <Button variant="secondary" size="sm" onClick={() => pinMutation.mutate(proj.id)} disabled={pinMutation.isPending}>
                             {proj.isPinned ? 'Unpin' : 'Pin'}
                         </Button>
-                        {useAuthStore.getState().user?.role === 'ADMIN' && (
+                        {currentUser?.role === 'ADMIN' && (
                             <Button variant="ghost" size="sm" onClick={() => {
                                 if (window.confirm('Delete this project permanently?')) deleteMutation.mutate(proj.id);
                             }} disabled={deleteMutation.isPending}>
@@ -198,7 +199,7 @@ const AdminApprovalQueue = () => {
                         {/* Action buttons in modal */}
                         {!selectedProject.isApproved && (
                             <div style={{ display: 'flex', gap: 'var(--space-md)', paddingTop: 'var(--space-md)', borderTop: '1px solid var(--c-border)' }}>
-                                {useAuthStore.getState().user?.role === 'ADMIN' && (
+                                {currentUser?.role === 'ADMIN' && (
                                     <Button
                                         variant="ghost"
                                         onClick={() => { if (window.confirm('Delete permanently?')) deleteMutation.mutate(selectedProject.id); }}
