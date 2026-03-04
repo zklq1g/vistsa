@@ -62,11 +62,22 @@ class AdminController {
     async toggleUserStatus(req, res) {
         try {
             const { id } = req.params;
-            const user = await userRepository.findById(id);
-            if (!user) return sendError(res, 'User not found', 404);
+            const targetUser = await userRepository.findById(id);
+            if (!targetUser) return sendError(res, 'User not found', 404);
 
-            await userRepository.update(id, { isActive: !user.isActive });
-            return sendSuccess(res, null, `User ${!user.isActive ? 'enabled' : 'disabled'} successfully`);
+            // Hierarchy Protection:
+            // 1. Nobody can disable a SYSTEM_ADMIN
+            if (targetUser.role === 'SYSTEM_ADMIN') {
+                return sendError(res, 'The System Admin account cannot be disabled.', 403);
+            }
+
+            // 2. Regular Admins cannot disable other ADMINS
+            if (req.user.role === 'ADMIN' && targetUser.role === 'ADMIN') {
+                return sendError(res, 'As a regular Admin, you do not have permission to disable another Admin.', 403);
+            }
+
+            await userRepository.update(id, { isActive: !targetUser.isActive });
+            return sendSuccess(res, null, `User ${!targetUser.isActive ? 'enabled' : 'disabled'} successfully`);
         } catch (error) {
             return sendError(res, error.message, 500);
         }
@@ -75,6 +86,20 @@ class AdminController {
     async permanentlyDeleteUser(req, res) {
         try {
             const { id } = req.params;
+            const targetUser = await userRepository.findById(id);
+            if (!targetUser) return sendError(res, 'User not found', 404);
+
+            // Hierarchy Protection:
+            // 1. Nobody can delete a SYSTEM_ADMIN
+            if (targetUser.role === 'SYSTEM_ADMIN') {
+                return sendError(res, 'The System Admin account is permanent and cannot be deleted.', 403);
+            }
+
+            // 2. Regular Admins cannot delete other ADMINS
+            if (req.user.role === 'ADMIN' && targetUser.role === 'ADMIN') {
+                return sendError(res, 'As a regular Admin, you do not have permission to delete another Admin.', 403);
+            }
+
             await userRepository.delete(id);
             return sendSuccess(res, null, 'User permanently deleted');
         } catch (error) {

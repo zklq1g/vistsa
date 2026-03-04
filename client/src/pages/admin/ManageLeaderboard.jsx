@@ -45,11 +45,11 @@ const AdminLeaderboard = () => {
     });
 
     const resetMutation = useMutation({
-        mutationFn: () => api.post('/leaderboard/reset'),
+        mutationFn: (password) => api.post('/leaderboard/reset', { password }),
         onSuccess: (res) => {
             queryClient.invalidateQueries(['admin-leaderboard']);
             const count = res.data?.count || 0;
-            toast.success(`Leaderboard reset successfully for ${count} members.`);
+            toast.success(`Leaderboard cleared successfully. ${count} records removed.`);
             setIsResetModalOpen(false);
             setResetConfirmText('');
         },
@@ -73,13 +73,15 @@ const AdminLeaderboard = () => {
 
     const handleReset = (e) => {
         e.preventDefault();
-        if (resetConfirmText.trim().toUpperCase() !== 'RESET') {
-            return toast.error('Type RESET to confirm');
+        if (!resetConfirmText.trim()) {
+            return toast.error('Please enter your password to confirm');
         }
-        resetMutation.mutate();
+        resetMutation.mutate(resetConfirmText);
     };
 
     if (usersLoading || lbLoading) return <div style={{ color: 'var(--c-text-muted)' }}>Loading...</div>;
+
+    const isSystemAdmin = useAuthStore.getState().user?.role === 'SYSTEM_ADMIN';
 
     return (
         <div>
@@ -89,9 +91,11 @@ const AdminLeaderboard = () => {
                     <p style={{ color: 'var(--c-text-muted)' }}>Award or deduct points per member for hackathons, papers, and contributions.</p>
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
-                    <Button variant="ghost" onClick={() => setIsResetModalOpen(true)}>
-                        <RotateCcw size={16} color="#f85149" /> <span style={{ color: '#f85149' }}>Reset Season</span>
-                    </Button>
+                    {isSystemAdmin && (
+                        <Button variant="ghost" onClick={() => setIsResetModalOpen(true)}>
+                            <RotateCcw size={16} color="#f85149" /> <span style={{ color: '#f85149' }}>Reset Season</span>
+                        </Button>
+                    )}
                     <Button variant="ghost" onClick={() => openModal(true)} style={{ borderColor: '#f85149', color: '#f85149' }}>
                         <Minus size={18} /> Deduct
                     </Button>
@@ -215,30 +219,30 @@ const AdminLeaderboard = () => {
             <Modal isOpen={isResetModalOpen} onClose={() => { setIsResetModalOpen(false); setResetConfirmText(''); }} title="Reset Leaderboard Season">
                 <div style={{ backgroundColor: 'rgba(248, 81, 73, 0.1)', border: '1px solid rgba(248, 81, 73, 0.2)', padding: 'var(--space-md)', borderRadius: 'var(--r-md)', marginBottom: 'var(--space-lg)' }}>
                     <p style={{ color: '#f85149', margin: 0, fontSize: '0.875rem' }}>
-                        <strong>WARNING:</strong> This will set all member points to zero. This is typically done at the end of an academic year. This action cannot be undone.
+                        <strong>DANGER ZONE:</strong> This will <strong>PERMANENTLY DELETE</strong> all member names and scores from the leaderboard. This action cannot be undone.
                     </p>
                 </div>
                 <form onSubmit={handleReset} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
                     <div>
                         <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem' }}>
-                            Type <strong style={{ color: '#f85149', fontFamily: 'var(--font-mono)' }}>RESET</strong> to confirm
+                            Enter your <strong>System Admin Password</strong> to authorize this reset
                         </label>
                         <input
-                            type="text"
+                            type="password"
                             value={resetConfirmText}
                             onChange={e => setResetConfirmText(e.target.value)}
-                            placeholder="Type RESET here..."
-                            autoComplete="off"
-                            style={{ width: '100%', padding: '10px', borderRadius: 'var(--r-md)', backgroundColor: 'var(--c-surface-2)', color: 'var(--c-text)', border: `1px solid ${resetConfirmText.toUpperCase() === 'RESET' ? '#f85149' : 'var(--c-border)'}`, cursor: 'text', fontFamily: 'var(--font-mono)' }}
+                            placeholder="Enter your password..."
+                            autoComplete="current-password"
+                            style={{ width: '100%', padding: '10px', borderRadius: 'var(--r-md)', backgroundColor: 'var(--c-surface-2)', color: 'var(--c-text)', border: '1px solid var(--c-border)', cursor: 'text' }}
                         />
                     </div>
                     <Button
                         type="submit"
                         variant="secondary"
-                        disabled={resetMutation.isPending || resetConfirmText.trim().toUpperCase() !== 'RESET'}
+                        disabled={resetMutation.isPending || !resetConfirmText.trim()}
                         style={{ marginTop: 'var(--space-sm)', borderColor: '#f85149', color: '#f85149' }}
                     >
-                        {resetMutation.isPending ? 'Resetting...' : 'Permanently Reset Leaderboard'}
+                        {resetMutation.isPending ? 'Clearing...' : 'Wipe Leaderboard Entirely'}
                     </Button>
                 </form>
             </Modal>

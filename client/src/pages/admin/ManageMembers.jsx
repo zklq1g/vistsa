@@ -126,18 +126,29 @@ const AdminMembers = () => {
                         opacity: user.isActive ? 1 : 0.6
                     }}>
                         <div style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            {user.displayName}
-                            {!user.isActive && <Badge variant="neutral" size="sm">DISABLED</Badge>}
+                            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                <span style={{ fontWeight: 500 }}>{user.displayName}</span>
+                                {user.role === 'SYSTEM_ADMIN' && (
+                                    <span style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', backgroundColor: 'rgba(212,197,169,0.2)', color: 'var(--c-accent)', border: '1px solid var(--c-accent)', fontWeight: 700 }}>SYSTEM ADMIN</span>
+                                )}
+                                {user.role === 'ADMIN' && (
+                                    <span style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', backgroundColor: 'var(--c-surface-3)', color: 'var(--c-text)', border: '1px solid var(--c-border)', fontWeight: 600 }}>ADMIN</span>
+                                )}
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--c-text-muted)' }}>@{user.username}</div>
                         </div>
-                        <div style={{ color: 'var(--c-text-muted)', fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}>{user.username}</div>
-                        <div>
-                            <Badge variant={user.role === 'ADMIN' ? 'accent' : 'neutral'}>{user.role}</Badge>
-                        </div>
-                        <div style={{ textAlign: 'center', display: 'flex', gap: '6px', justifyContent: 'center' }}>
-                            <Button variant="ghost" size="sm" onClick={() => {
-                                setEditingUser(user);
-                                setIsEditModalOpen(true);
-                            }} title="Settings">
+                        <div style={{ color: 'var(--c-text-muted)', fontSize: '0.875rem' }}>{user.id}</div>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    setSelectedUser(user);
+                                    setNewRole(user.role);
+                                    setIsEditModalOpen(true);
+                                }}
+                                disabled={user.role === 'SYSTEM_ADMIN' || (currentUser.role === 'ADMIN' && user.role === 'ADMIN')}
+                            >
                                 <Settings2 size={16} />
                             </Button>
 
@@ -148,7 +159,7 @@ const AdminMembers = () => {
                                         toggleStatusMutation.mutate(user.id);
                                     }
                                 }}
-                                disabled={toggleStatusMutation.isPending || user.role === 'ADMIN'}
+                                disabled={toggleStatusMutation.isPending || user.role === 'SYSTEM_ADMIN' || (currentUser.role === 'ADMIN' && user.role === 'ADMIN')}
                                 title={user.isActive ? 'Disable User' : 'Enable User'}
                                 style={{
                                     width: '36px',
@@ -157,10 +168,11 @@ const AdminMembers = () => {
                                     backgroundColor: user.isActive ? '#3fb950' : 'var(--c-surface-3)',
                                     position: 'relative',
                                     border: '1px solid var(--c-border)',
-                                    cursor: user.role === 'ADMIN' ? 'not-allowed' : 'pointer',
+                                    cursor: (user.role === 'SYSTEM_ADMIN' || (currentUser.role === 'ADMIN' && user.role === 'ADMIN')) ? 'not-allowed' : 'pointer',
                                     padding: 0,
                                     margin: '0 8px',
-                                    transition: 'background-color 0.2s'
+                                    transition: 'background-color 0.2s',
+                                    opacity: (user.role === 'SYSTEM_ADMIN' || (currentUser.role === 'ADMIN' && user.role === 'ADMIN')) ? 0.5 : 1
                                 }}
                             >
                                 <div style={{
@@ -179,14 +191,14 @@ const AdminMembers = () => {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => {
-                                    if (window.confirm(`CRITICAL: Are you sure you want to PERMANENTLY delete ${user.username}? This cannot be undone.`)) {
-                                        hardDeleteMutation.mutate(user.id);
+                                    if (window.confirm(`Are you sure you want to PERMANENTLY delete ${user.username}? This cannot be undone.`)) {
+                                        deleteUserMutation.mutate(user.id);
                                     }
                                 }}
-                                disabled={hardDeleteMutation.isPending || user.role === 'ADMIN'}
-                                title="Permanently Delete"
+                                disabled={deleteUserMutation.isPending || user.role === 'SYSTEM_ADMIN' || (currentUser.role === 'ADMIN' && user.role === 'ADMIN')}
+                                style={{ color: '#f85149' }}
                             >
-                                <Trash2 size={16} color={user.role === 'ADMIN' ? 'var(--c-text-muted)' : '#f85149'} />
+                                <Trash2 size={16} />
                             </Button>
                         </div>
                     </div>

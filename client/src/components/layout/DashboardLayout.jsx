@@ -79,7 +79,7 @@ const DashboardLayout = ({ requireAdmin = false }) => {
         { icon: Users, label: 'Manage Members', to: '/admin/members' },
         { icon: Calendar, label: 'Manage Events', to: '/admin/events' },
         { icon: BookOpen, label: 'Study Resources', to: '/admin/study' },
-        { icon: BarChart2, label: 'Homepage Stats', to: '/admin/stats' },
+        ...(user?.role === 'SYSTEM_ADMIN' ? [{ icon: BarChart2, label: 'Homepage Stats', to: '/admin/stats' }] : []),
     ] : [
         { icon: FolderGit2, label: 'Projects', to: '/dashboard' },
         { icon: Trophy, label: 'Leaderboard', to: '/dashboard/leaderboard' },

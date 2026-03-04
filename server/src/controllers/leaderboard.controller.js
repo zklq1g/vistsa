@@ -54,12 +54,27 @@ class LeaderboardController {
 
     async resetLeaderboard(req, res) {
         try {
-            console.log(`[Admin] Resetting leaderboard requested by ${req.user.username}`);
-            // Resetting all points to 0 effectively resets the season ranking
-            const result = await prisma.leaderboardEntry.updateMany({ data: { points: 0 } });
+            const { password } = req.body;
+            const userId = req.user.userId;
 
-            console.log(`[Admin] Reset successful. Rows affected: ${result.count}`);
-            return sendSuccess(res, { count: result.count }, `Leaderboard reset successfully for ${result.count} members`);
+            if (!password) return sendError(res, 'Password is required to reset the leaderboard', 400);
+
+            // Fetch the user to get the hashed password
+            const user = await prisma.user.findUnique({ where: { id: userId } });
+            if (!user) return sendError(res, 'User not found', 404);
+
+            // Verify password
+            const bcrypt = require('bcrypt');
+            const isValid = await bcrypt.compare(password, user.password);
+            if (!isValid) return sendError(res, 'Invalid password. Reset authorization failed.', 401);
+
+            console.log(`[Admin] Resetting leaderboard (clearing all entries) requested by ${user.username}`);
+
+            // User requested to clear names, not just reset points to 0
+            const result = await prisma.leaderboardEntry.deleteMany({});
+
+            console.log(`[Admin] Reset successful. Entries deleted: ${result.count}`);
+            return sendSuccess(res, { count: result.count }, `Leaderboard cleared successfully. ${result.count} records removed.`);
         } catch (error) {
             console.error('[Admin] Leaderboard reset failed:', error);
             return sendError(res, error.message, 500);
