@@ -16,8 +16,10 @@ import {
     Menu,
     X,
     ShieldCheck,
-    LayoutDashboard
+    LayoutDashboard,
+    BarChart2
 } from 'lucide-react';
+
 
 const SidebarItem = ({ icon: Icon, label, to, isCollapsed, onClick }) => (
     <NavLink
