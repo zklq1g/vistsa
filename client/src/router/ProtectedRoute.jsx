@@ -1,6 +1,7 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { ShieldAlert } from 'lucide-react';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const { isLoggedIn, user } = useAuthStore();
@@ -13,7 +14,26 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
     if (allowedRoles && user && !allowedRoles.includes(user.role)) {
         // Role not allowed (e.g. member trying to access /admin)
-        return <Navigate to="/dashboard" replace />;
+        return (
+            <div style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                justifyContent: 'center', height: '100vh', padding: '20px',
+                textAlign: 'center', backgroundColor: 'var(--c-bg)'
+            }}>
+                <ShieldAlert size={64} style={{ color: '#f85149', marginBottom: '16px' }} />
+                <h1 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>Access Denied</h1>
+                <p style={{ color: 'var(--c-text-muted)', marginBottom: '24px', maxWidth: '400px' }}>
+                    You do not have the required permissions ({allowedRoles.join(' or ')}) to view this page.
+                </p>
+                <Link to="/dashboard" style={{
+                    padding: '10px 20px', backgroundColor: 'var(--c-accent)',
+                    color: 'white', textDecoration: 'none', borderRadius: 'var(--r-md)',
+                    fontWeight: 500
+                }}>
+                    Return to Dashboard
+                </Link>
+            </div>
+        );
     }
 
     return children;

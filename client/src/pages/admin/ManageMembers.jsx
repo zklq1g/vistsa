@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import Badge from '../../components/ui/Badge';
+import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { useAuthStore } from '../../store/authStore';
 import { UserPlus, Settings2, Trash2, Users } from 'lucide-react';
 
@@ -22,6 +23,19 @@ const AdminMembers = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
     const [editFormData, setEditFormData] = useState({ newPassword: '' });
+
+    // ConfirmDialog states
+    const [confirmState, setConfirmState] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => {},
+        confirmLabel: 'Confirm',
+        variant: 'danger'
+    });
+
+    const openConfirm = (config) => setConfirmState({ ...config, isOpen: true });
+    const closeConfirm = () => setConfirmState(prev => ({ ...prev, isOpen: false }));
 
     const { data: users, isLoading } = useQuery({
         queryKey: ['admin-users'],
@@ -71,12 +85,18 @@ const AdminMembers = () => {
         e.preventDefault();
         if (!editFormData.newPassword) return toast.error('New password is required');
 
-        if (window.confirm(`Are you sure you want to reset the password for ${editingUser.username}?`)) {
-            resetPasswordMutation.mutate({
-                id: editingUser.id,
-                newPassword: editFormData.newPassword
-            });
-        }
+        openConfirm({
+            title: 'Reset Password',
+            message: `Are you sure you want to reset the password for ${editingUser.username}?`,
+            confirmLabel: 'Reset Password',
+            variant: 'warning',
+            onConfirm: () => {
+                resetPasswordMutation.mutate({
+                    id: editingUser.id,
+                    newPassword: editFormData.newPassword
+                });
+            }
+        });
     };
 
     const handleSubmit = (e) => {
@@ -85,6 +105,27 @@ const AdminMembers = () => {
             return toast.error('Please fill all required fields');
         }
         createMutation.mutate(formData);
+    };
+
+    const handleToggleStatus = (user) => {
+        const action = user.isActive ? 'disable' : 'enable';
+        openConfirm({
+            title: `${action === 'enable' ? 'Enable' : 'Disable'} User`,
+            message: `Are you sure you want to ${action} the account for ${user.username}? ${action === 'disable' ? 'They will not be able to log in.' : ''}`,
+            confirmLabel: `${action === 'enable' ? 'Enable' : 'Disable'} Account`,
+            variant: action === 'enable' ? 'warning' : 'danger',
+            onConfirm: () => toggleStatusMutation.mutate(user.id)
+        });
+    };
+
+    const handleDelete = (user) => {
+        openConfirm({
+            title: 'Permanently Delete User',
+            message: `PERMANENTLY DELETE ${user.username}? \nThis action cannot be undone and will remove all their data.`,
+            confirmLabel: 'Delete Forever',
+            variant: 'danger',
+            onConfirm: () => hardDeleteMutation.mutate(user.id)
+        });
     };
 
     if (isLoading) return <div style={{ padding: '40px', color: 'var(--c-text-muted)' }}>Loading members database...</div>;
@@ -101,109 +142,118 @@ const AdminMembers = () => {
                 </Button>
             </div>
 
-            <div style={{ backgroundColor: 'var(--c-surface)', borderRadius: 'var(--r-md)', border: '1px solid var(--c-border)', overflow: 'hidden' }}>
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1.2fr 1fr 100px 140px',
-                    padding: '16px 24px',
-                    borderBottom: '1px solid var(--c-border)',
-                    backgroundColor: 'var(--c-surface-2)',
-                    fontSize: '0.875rem',
-                    color: 'var(--c-text-muted)',
-                    textTransform: 'uppercase'
-                }}>
-                    <div>Member</div>
-                    <div>Username</div>
-                    <div style={{ textAlign: 'left' }}>Role</div>
-                    <div style={{ textAlign: 'right' }}>Actions</div>
-                </div>
-
-                {users?.map((user) => (
-                    <div key={user.id} style={{
-                        display: 'grid',
-                        gridTemplateColumns: '1.2fr 1fr 100px 140px',
-                        padding: '16px 24px',
+            <div style={{ backgroundColor: 'var(--c-surface)', borderRadius: 'var(--r-md)', border: '1px solid var(--c-border)', overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }} aria-label="Members List">
+                    <thead style={{
                         borderBottom: '1px solid var(--c-border)',
-                        alignItems: 'center',
-                        opacity: user.isActive ? 1 : 0.6
+                        backgroundColor: 'var(--c-surface-2)',
+                        fontSize: '0.875rem',
+                        color: 'var(--c-text-muted)',
+                        textTransform: 'uppercase'
                     }}>
-                        <div style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {user.displayName}
-                            {!user.isActive && <Badge variant="neutral" size="sm">DISABLED</Badge>}
-                        </div>
-                        <div style={{ color: 'var(--c-text-muted)', fontFamily: 'var(--font-mono)', fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.username}</div>
-                        <div style={{ textAlign: 'left' }}>
-                            <Badge variant={user.role === 'ADMIN' ? 'accent' : (user.role === 'MOD' ? 'warning' : 'neutral')}>
-                                {user.role === 'MOD' ? 'MOD' : user.role}
-                            </Badge>
-                        </div>
-                        <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end', alignItems: 'center' }}>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                    setEditingUser(user);
-                                    setIsEditModalOpen(true);
-                                }}
-                                title="Reset Password / Edit"
-                            >
-                                <Settings2 size={16} />
-                            </Button>
-
-                            <button
-                                onClick={() => {
-                                    const action = user.isActive ? 'disable' : 'enable';
-                                    if (window.confirm(`Are you sure you want to ${action} ${user.username}?`)) {
-                                        toggleStatusMutation.mutate(user.id);
-                                    }
-                                }}
-                                disabled={toggleStatusMutation.isPending || (user.role === 'ADMIN') || (currentUser?.role === 'MOD' && user.role !== 'MEMBER')}
-                                title={user.isActive ? 'Disable User' : 'Enable User'}
-                                style={{
-                                    width: '34px',
-                                    height: '18px',
-                                    borderRadius: '9px',
-                                    backgroundColor: user.isActive ? '#3fb950' : 'var(--c-surface-3)',
-                                    position: 'relative',
-                                    border: '1px solid var(--c-border)',
-                                    cursor: (user.role === 'ADMIN' || (currentUser?.role === 'MOD' && user.role !== 'MEMBER')) ? 'not-allowed' : 'pointer',
-                                    padding: 0,
-                                    margin: '0 4px',
+                        <tr>
+                            <th scope="col" style={{ padding: '16px 24px', width: '35%' }}>Member</th>
+                            <th scope="col" style={{ padding: '16px 24px', width: '25%' }}>Username</th>
+                            <th scope="col" style={{ padding: '16px 24px', width: '15%' }}>Role</th>
+                            <th scope="col" style={{ padding: '16px 24px', width: '25%', textAlign: 'right' }}>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {users?.map((user) => {
+                            const isSelf = user.id === currentUser?.id;
+                            const isHigherRank = user.role === 'ADMIN' || (currentUser?.role === 'MOD' && user.role !== 'MEMBER');
+                            const canModifyStatus = !isHigherRank && !isSelf;
+                            
+                            return (
+                                <tr key={user.id} style={{
+                                    borderBottom: '1px solid var(--c-border)',
+                                    opacity: user.isActive ? 1 : 0.6,
                                     transition: 'background-color 0.2s',
-                                    flexShrink: 0
-                                }}
-                            >
-                                <div style={{
-                                    width: '12px',
-                                    height: '12px',
-                                    borderRadius: '50%',
-                                    backgroundColor: '#fff',
-                                    position: 'absolute',
-                                    top: '2px',
-                                    left: user.isActive ? '18px' : '2px',
-                                    transition: 'left 0.2s'
-                                }} />
-                            </button>
+                                }}>
+                                    <td style={{ padding: '16px 24px' }}>
+                                        <div style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            {user.displayName}
+                                            {!user.isActive && <Badge variant="neutral" size="sm">DISABLED</Badge>}
+                                        </div>
+                                    </td>
+                                    
+                                    <td style={{ padding: '16px 24px' }}>
+                                        <div style={{ color: 'var(--c-text-muted)', fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}>
+                                            {user.username}
+                                        </div>
+                                    </td>
 
-                            {/* Delete strictly ADMIN only */}
-                            {currentUser?.role === 'ADMIN' && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                        if (window.confirm(`PERMANENTLY DELETE ${user.username}? This cannot be undone.`)) {
-                                            hardDeleteMutation.mutate(user.id);
-                                        }
-                                    }}
-                                    disabled={hardDeleteMutation.isPending || user.id === currentUser?.id}
-                                    title="Permanently Delete"
-                                >
-                                    <Trash2 size={16} color={user.id === currentUser?.id ? 'var(--c-text-muted)' : '#f85149'} />
-                                </Button>
-                            )}
-                        </div>
-                    </div>
-                ))}
+                                    <td style={{ padding: '16px 24px' }}>
+                                        <Badge variant={user.role === 'ADMIN' ? 'accent' : (user.role === 'MOD' ? 'warning' : 'neutral')}>
+                                            {user.role === 'MOD' ? 'MOD' : user.role}
+                                        </Badge>
+                                    </td>
+
+                                    <td style={{ padding: '16px 24px' }}>
+                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setEditingUser(user);
+                                                    setIsEditModalOpen(true);
+                                                }}
+                                                title="Reset Password / Edit"
+                                                aria-label={`Settings for ${user.displayName}`}
+                                            >
+                                                <Settings2 size={16} />
+                                            </Button>
+
+                                            <button
+                                                onClick={() => handleToggleStatus(user)}
+                                                disabled={toggleStatusMutation.isPending || !canModifyStatus}
+                                                aria-disabled={!canModifyStatus}
+                                                title={user.isActive ? 'Disable User' : 'Enable User'}
+                                                aria-label={user.isActive ? `Disable ${user.displayName}` : `Enable ${user.displayName}`}
+                                                style={{
+                                                    width: '36px',
+                                                    height: '20px',
+                                                    borderRadius: '10px',
+                                                    backgroundColor: user.isActive ? '#3fb950' : 'var(--c-surface-3)',
+                                                    position: 'relative',
+                                                    border: '1px solid var(--c-border)',
+                                                    cursor: !canModifyStatus ? 'not-allowed' : 'pointer',
+                                                    padding: 0,
+                                                    transition: 'background-color 0.2s',
+                                                    opacity: canModifyStatus ? 1 : 0.5
+                                                }}
+                                            >
+                                                <div style={{
+                                                    width: '14px',
+                                                    height: '14px',
+                                                    borderRadius: '50%',
+                                                    backgroundColor: '#fff',
+                                                    position: 'absolute',
+                                                    top: '2px',
+                                                    left: user.isActive ? '18px' : '2px',
+                                                    transition: 'left 0.2s'
+                                                }} />
+                                            </button>
+
+                                            {currentUser?.role === 'ADMIN' && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleDelete(user)}
+                                                    disabled={hardDeleteMutation.isPending || isSelf}
+                                                    title={isSelf ? "Cannot delete yourself" : "Permanently Delete"}
+                                                    aria-label={`Delete ${user.displayName}`}
+                                                >
+                                                    <Trash2 size={16} color={isSelf ? 'var(--c-text-muted)' : '#f85149'} />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
 
                 {users?.length === 0 && (
                     <div style={{ padding: '64px 24px', textAlign: 'center', color: 'var(--c-text-muted)' }}>
@@ -305,6 +355,17 @@ const AdminMembers = () => {
                     </div>
                 </form>
             </Modal>
+
+            {/* Accessible Confirmation Dialog */}
+            <ConfirmDialog 
+                isOpen={confirmState.isOpen}
+                onClose={closeConfirm}
+                title={confirmState.title}
+                message={confirmState.message}
+                confirmLabel={confirmState.confirmLabel}
+                variant={confirmState.variant}
+                onConfirm={confirmState.onConfirm}
+            />
         </div>
     );
 };

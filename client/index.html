@@ -7,6 +7,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="VISTA — The Vision & Innovation in Science, Technology & AI club." />
     <title>VISTA</title>
+    <script>
+      (function() {
+        try {
+          var state = localStorage.getItem('vista-theme-storage');
+          if (state) {
+            var parsedState = JSON.parse(state);
+            var theme = parsedState?.state?.theme;
+            if (theme) {
+              document.documentElement.setAttribute('data-theme', theme);
+            }
+          }
+        } catch (e) {
+          console.error("Failed to parse theme from localStorage", e);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

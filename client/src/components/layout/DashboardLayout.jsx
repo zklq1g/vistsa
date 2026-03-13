@@ -26,6 +26,7 @@ const SidebarItem = ({ icon: Icon, label, to, isCollapsed, onClick }) => (
         to={to}
         end={to === '/dashboard' || to === '/admin'}
         onClick={onClick}
+        aria-label={isCollapsed ? label : undefined}
         style={({ isActive }) => ({
             display: 'flex',
             alignItems: 'center',
@@ -98,6 +99,9 @@ const DashboardLayout = ({ requireAdmin = false }) => {
         { icon: Calendar, label: 'Events', to: '/dashboard/events' },
     ]);
 
+    // Determine page title for the panel
+    const panelTitle = isModeratorPanel ? 'Moderator Panel' : (requireAdmin ? 'Admin Dashboard' : 'Dashboard');
+
     const sidebarContent = (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             {/* Header */}
@@ -140,6 +144,7 @@ const DashboardLayout = ({ requireAdmin = false }) => {
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
                         aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                        aria-expanded={!isCollapsed}
                         style={{
                             color: 'var(--c-text-muted)',
                             minWidth: '36px',
@@ -155,7 +160,11 @@ const DashboardLayout = ({ requireAdmin = false }) => {
             </div>
 
             {/* Nav items */}
-            <nav style={{ flex: 1, padding: '12px', overflowY: 'auto' }}>
+            <nav
+                role="navigation"
+                aria-label="Main menu"
+                style={{ flex: 1, padding: '12px', overflowY: 'auto' }}
+            >
                 {isModeratorPanel && !isCollapsed && (
                     <div style={{
                         padding: '0 16px 8px',
@@ -220,6 +229,7 @@ const DashboardLayout = ({ requireAdmin = false }) => {
 
                 <button
                     onClick={handleLogout}
+                    aria-label="Sign out"
                     style={{
                         width: '100%',
                         display: 'flex',
@@ -245,6 +255,11 @@ const DashboardLayout = ({ requireAdmin = false }) => {
     return (
         <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--c-bg)' }}>
 
+            {/* ── Skip to main content link ── */}
+            <a href="#main-content" className="skip-link">
+                Skip to main content
+            </a>
+
             {/* ── MOBILE: Top bar + overlay drawer ── */}
             {isMobile && (
                 <>
@@ -264,6 +279,8 @@ const DashboardLayout = ({ requireAdmin = false }) => {
                         <button
                             onClick={() => setIsMobileOpen(true)}
                             aria-label="Open menu"
+                            aria-haspopup="true"
+                            aria-expanded={isMobileOpen}
                             style={{
                                 color: 'var(--c-text-muted)',
                                 minWidth: 'var(--touch-target)',
@@ -274,6 +291,7 @@ const DashboardLayout = ({ requireAdmin = false }) => {
                             }}
                         >
                             <Menu size={22} />
+                            <span className="sr-only">Toggle menu</span>
                         </button>
                         <span style={{
                             fontFamily: 'var(--font-heading)',
@@ -314,6 +332,8 @@ const DashboardLayout = ({ requireAdmin = false }) => {
                                 animate={{ x: 0 }}
                                 exit={{ x: '-100%' }}
                                 transition={{ type: 'spring', stiffness: 300, damping: 35 }}
+                                role="navigation"
+                                aria-label="Mobile navigation"
                                 style={{
                                     position: 'fixed',
                                     top: 0, left: 0, bottom: 0,
@@ -337,6 +357,7 @@ const DashboardLayout = ({ requireAdmin = false }) => {
                     initial={false}
                     animate={{ width: isCollapsed ? 72 : 260 }}
                     transition={{ type: 'spring', stiffness: 300, damping: 35 }}
+                    aria-label="Sidebar navigation"
                     style={{
                         borderRight: '1px solid var(--c-border)',
                         backgroundColor: 'var(--c-surface)',
@@ -353,14 +374,19 @@ const DashboardLayout = ({ requireAdmin = false }) => {
             )}
 
             {/* Main Content Area */}
-            <main style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                /* Account for mobile top bar */
-                paddingTop: isMobile ? '56px' : 0,
-                minWidth: 0, /* prevent flex overflow */
-            }}>
+            <main
+                id="main-content"
+                tabIndex="-1"
+                style={{
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    /* Account for mobile top bar */
+                    paddingTop: isMobile ? '56px' : 0,
+                    minWidth: 0, /* prevent flex overflow */
+                    outline: 'none', /* remove focus outline on skip-link target */
+                }}
+            >
                 <div style={{
                     padding: isMobile ? 'var(--space-md)' : 'var(--space-xl)',
                     flex: 1,
