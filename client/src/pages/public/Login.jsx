@@ -127,8 +127,8 @@ const Login = () => {
                                 style={styles.eyeBtn}
                             >
                                 {showPassword
-                                    ? <EyeOff size={18} color="#8a8070" />
-                                    : <Eye size={18} color="#8a8070" />
+                                    ? <EyeOff size={18} color="var(--c-text-muted)" />
+                                    : <Eye size={18} color="var(--c-text-muted)" />
                                 }
                             </button>
                         </div>
@@ -257,29 +257,30 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         padding: 'var(--space-md)',
-        background: 'linear-gradient(135deg, #f8f6f1 0%, #eee9df 50%, #e8e2d6 100%)',
+        backgroundColor: 'var(--c-bg)',
     },
     card: {
         width: '100%',
         maxWidth: '420px',
         padding: 'clamp(1.5rem, 5vw, 2.5rem)',
         borderRadius: 'var(--r-lg)',
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--c-surface)',
         boxShadow: '0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04)',
         display: 'flex',
         flexDirection: 'column',
         gap: 'var(--space-lg)',
+        border: '1px solid var(--c-border)',
     },
     logo: {
         fontSize: 'clamp(1.8rem, 5vw, 2.2rem)',
         fontFamily: 'var(--font-heading)',
         fontWeight: 700,
-        color: '#1a1814',
+        color: 'var(--c-text)',
         letterSpacing: '-0.02em',
         marginBottom: '4px',
     },
     subtitle: {
-        color: '#7a7060',
+        color: 'var(--c-text-muted)',
         fontSize: '0.9rem',
         fontWeight: 400,
     },
@@ -293,15 +294,15 @@ const styles = {
         marginBottom: '6px',
         fontSize: '0.85rem',
         fontWeight: 500,
-        color: '#3a3530',
+        color: 'var(--c-text)',
     },
     input: {
         width: '100%',
         padding: '12px 16px',
         borderRadius: 'var(--r-md)',
-        border: '1.5px solid #d5cfc5',
-        backgroundColor: '#fafaf7',
-        color: '#1a1814',
+        border: '1px solid var(--c-border)',
+        backgroundColor: 'var(--c-surface-2)',
+        color: 'var(--c-text)',
         fontFamily: 'var(--font-body)',
         fontSize: '16px', /* Critical for iOS — prevents zoom on focus */
         outline: 'none',
@@ -339,25 +340,25 @@ const styles = {
         alignItems: 'center',
         gap: '6px',
         fontSize: '0.825rem',
-        color: '#5a5348',
+        color: 'var(--c-text)',
         cursor: 'pointer',
         userSelect: 'none',
     },
     checkbox: {
         width: '16px',
         height: '16px',
-        accentColor: '#5a4a2a',
+        accentColor: 'var(--c-accent)',
         cursor: 'pointer',
     },
     tooltip: {
         display: 'inline-flex',
         alignItems: 'center',
-        color: '#a09888',
+        color: 'var(--c-text-muted)',
         cursor: 'help',
     },
     forgotLink: {
         fontSize: '0.825rem',
-        color: '#5a4a2a',
+        color: 'var(--c-accent)',
         fontWeight: 500,
         cursor: 'pointer',
         textDecoration: 'none',
@@ -374,11 +375,11 @@ const styles = {
     dividerLine: {
         flex: 1,
         height: '1px',
-        backgroundColor: '#e0dbd2',
+        backgroundColor: 'var(--c-border)',
     },
     dividerText: {
         fontSize: '0.75rem',
-        color: '#a09888',
+        color: 'var(--c-text-muted)',
         whiteSpace: 'nowrap',
     },
     socialRow: {
@@ -393,9 +394,9 @@ const styles = {
         gap: '8px',
         padding: '12px 16px',
         borderRadius: 'var(--r-md)',
-        border: '1.5px solid #d5cfc5',
-        backgroundColor: '#fafaf7',
-        color: '#3a3530',
+        border: '1px solid var(--c-border)',
+        backgroundColor: 'var(--c-surface-2)',
+        color: 'var(--c-text)',
         fontSize: '0.875rem',
         fontFamily: 'var(--font-body)',
         fontWeight: 500,
@@ -406,7 +407,7 @@ const styles = {
     footer: {
         textAlign: 'center',
         fontSize: '0.75rem',
-        color: '#a09888',
+        color: 'var(--c-text-muted)',
         margin: 0,
     },
 };
