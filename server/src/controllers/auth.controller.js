@@ -19,8 +19,13 @@ class AuthController {
 
     async me(req, res) {
         try {
-            // req.user is hydrated by auth.middleware
-            return sendSuccess(res, { user: req.user }, 'Current user data fetched');
+            const UserRepo = require('../repositories/user.repository');
+            const user = await UserRepo.findById(req.user.userId);
+            if (!user) return sendError(res, 'User not found', 404);
+            
+            // Exclude password
+            const { password, ...userWithoutPassword } = user;
+            return sendSuccess(res, { user: userWithoutPassword }, 'Current user data fetched');
         } catch (error) {
             return sendError(res, 'Error fetching user data', 500);
         }

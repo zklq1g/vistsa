@@ -17,6 +17,7 @@ api.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+        console.log(`VISTA API [REQ]: ${config.method?.toUpperCase()} ${config.url}`, config.data || '');
         return config;
     },
     (error) => Promise.reject(error)
@@ -24,10 +25,14 @@ api.interceptors.request.use(
 
 // Response Interceptor (handle auth errors globally)
 api.interceptors.response.use(
-    (response) => response.data, // Strip axios wrapper, return our formatted data
+    (response) => {
+        console.log(`VISTA API [RES]: ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
+        return response.data;
+    },
     (error) => {
         const status = error.response?.status;
         const message = error.response?.data?.message || 'Something went wrong';
+        console.error(`VISTA API [ERR]: ${error.config?.method?.toUpperCase()} ${error.config?.url} | Status: ${status}`, error.response?.data || error.message);
 
         if (status === 401) {
             // Auto logout on token expiration

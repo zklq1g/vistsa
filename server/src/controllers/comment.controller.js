@@ -13,15 +13,22 @@ const CommentController = {
     async addComment(req, res) {
         try {
             const { content } = req.body;
+            const { projectId } = req.params;
+            const userId = req.user.userId;
+
+            console.log(`[VISTA] Adding comment: user=${userId}, project=${projectId}`);
+
             if (!content) return res.status(400).json({ success: false, message: 'Content is required' });
 
             const newComment = await CommentRepository.create({
                 content,
-                projectId: req.params.projectId,
-                userId: req.user.userId
+                projectId,
+                userId
             });
+            console.log(`[VISTA] Comment created: ${newComment.id}`);
             res.status(201).json({ success: true, data: newComment });
         } catch (err) {
+            console.error('[VISTA] Add comment error:', err);
             res.status(500).json({ success: false, message: err.message });
         }
     },
