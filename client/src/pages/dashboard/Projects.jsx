@@ -5,7 +5,6 @@ import ProjectCard from '../../components/cards/ProjectCard';
 import Modal from '../../components/ui/Modal';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
-import EmptyState from '../../components/ui/EmptyState';
 import Comments from '../../components/ui/Comments';
 import toast from 'react-hot-toast';
 import { ExternalLink, Github, Upload, X as XIcon } from 'lucide-react';
