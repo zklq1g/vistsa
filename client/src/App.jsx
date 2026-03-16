@@ -25,7 +25,7 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  const { token, setUser, isLoggedIn } = useAuthStore();
+  const { token, user, setUser, isLoggedIn } = useAuthStore();
   const [isInitializing, setIsInitializing] = React.useState(!!token);
 
   // DEBUG HOOKS
