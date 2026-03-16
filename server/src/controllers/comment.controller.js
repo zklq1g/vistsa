@@ -18,7 +18,7 @@ const CommentController = {
             const newComment = await CommentRepository.create({
                 content,
                 projectId: req.params.projectId,
-                userId: req.user.id
+                userId: req.user.userId
             });
             res.status(201).json({ success: true, data: newComment });
         } catch (err) {
@@ -32,7 +32,7 @@ const CommentController = {
             if (!comment) return res.status(404).json({ success: false, message: 'Comment not found' });
 
             // Only author or admin can delete
-            if (comment.userId !== req.user.id && req.user.role !== 'ADMIN') {
+            if (comment.userId !== req.user.userId && req.user.role !== 'ADMIN') {
                 return res.status(403).json({ success: false, message: 'Unauthorized' });
             }
 
