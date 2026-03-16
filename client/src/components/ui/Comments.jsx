@@ -8,7 +8,6 @@ import { useAuthStore } from '../../store/authStore';
 import Button from './Button';
 import toast from 'react-hot-toast';
 
-console.log('VISTA: Comments.jsx (v2.1.2) script file evaluated.');
 
 const Comments = ({ projectId }) => {
     const [content, setContent] = useState('');
@@ -27,18 +26,12 @@ const Comments = ({ projectId }) => {
     // Add comment mutation
     const addMutation = useMutation({
         mutationFn: (newComment) => {
-            console.log('VISTA: Mutation function started', newComment);
             return api.post(`/comments/project/${projectId}`, newComment);
         },
         onSuccess: (res) => {
-            console.log('VISTA: Comment addition success', res);
             setContent('');
             queryClient.invalidateQueries(['comments', projectId]);
             toast.success('Comment posted!');
-        },
-        onError: (err) => {
-            console.error('VISTA: Comment addition error', err);
-            toast.error(err.message || 'Failed to post comment');
         },
     });
 
@@ -51,59 +44,23 @@ const Comments = ({ projectId }) => {
         },
     });
 
-    React.useEffect(() => {
-        window.VISTA_DEBUG = { projectId, isLoggedIn, user };
-        console.log('VISTA DEBUG: Component Mount', { projectId, isLoggedIn, user });
-        // alert('VISTA: Comments component logic starting...'); 
-    }, [projectId, isLoggedIn, user]);
-
     const handleSubmit = (e) => {
-        try {
-            if (e && e.preventDefault) e.preventDefault();
-            console.log('VISTA: handleSubmit triggered', { 
-                content, 
-                projectId, 
-                isLoggedIn, 
-                userRole: user?.role,
-                userId: user?.id 
-            });
-            
-            if (!isLoggedIn) {
-                console.error('VISTA: Blocked - Not logged in');
-                toast.error('Please log in to comment');
-                return;
-            }
-
-            if (!projectId) {
-                console.error('VISTA: BlockED - Missing projectId');
-                toast.error('Project ID error. Try refreshing.');
-                return;
-            }
-
-            if (!content.trim()) {
-                console.warn('VISTA: Content is empty');
-                return;
-            }
-
-            console.log('VISTA: Calling mutation for projectId:', projectId);
-            addMutation.mutate({ content });
-        } catch (error) {
-            console.error('VISTA: handleSubmit CRASHED:', error);
-            alert('VISTA: Event handler crashed. Check console.');
+        if (e && e.preventDefault) e.preventDefault();
+        
+        if (!isLoggedIn) {
+            toast.error('Please log in to comment');
+            return;
         }
-    };
 
-    // DEBUG: Direct access to submit for console testing
-    React.useEffect(() => {
-        window.VISTA_POST = (manualContent) => {
-            console.log('VISTA: Manual post triggered from window', manualContent);
-            addMutation.mutate({ content: manualContent || content });
-        };
-        window.VISTA_REFRESH = () => {
-            console.log('VISTA: Manual refresh triggered');
-            queryClient.invalidateQueries(['comments', projectId]);
-        };
-    }, [projectId, content]);
+        if (!projectId) {
+            toast.error('Project ID error. Try refreshing.');
+            return;
+        }
+
+        if (!content.trim()) return;
+
+        addMutation.mutate({ content });
+    };
 
     const formatDate = (dateStr) => {
         const date = new Date(dateStr);
@@ -123,7 +80,6 @@ const Comments = ({ projectId }) => {
     return (
         <div style={{ 
             marginTop: 'var(--space-12)', 
-            borderTop: '2px solid red', // VISUAL CANARY: If you see red border, code updated
             paddingTop: 'var(--space-10)',
             display: 'flex',
             flexDirection: 'column',

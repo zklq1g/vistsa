@@ -28,13 +28,6 @@ const App = () => {
   const { token, user, setUser, isLoggedIn } = useAuthStore();
   const [isInitializing, setIsInitializing] = React.useState(!!token);
 
-  // DEBUG HOOKS
-  React.useEffect(() => {
-    window.VISTA_AUTH = useAuthStore.getState();
-    window.VISTA_API = api;
-    window.VISTA_VERSION = "2.1.0-DEBUG-CANARY"; // Update this to verify HMR
-    console.log('VISTA: Version', window.VISTA_VERSION);
-  }, []);
 
   React.useEffect(() => {
     const initAuth = async () => {
@@ -133,23 +126,6 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        {/* DEBUG BANNER - REMOVE AFTER FIX */}
-        <div style={{
-          position: 'fixed',
-          bottom: 10,
-          right: 10,
-          background: 'rgba(0,0,0,0.8)',
-          color: '#0f0',
-          padding: '5px 10px',
-          borderRadius: '5px',
-          fontSize: '10px',
-          zIndex: 100000,
-          pointerEvents: 'none',
-          fontFamily: 'monospace',
-          border: '1px solid #0f0'
-        }}>
-          V: 2.1.2-CANARY | R: {user?.role || 'NONE'} | ID: {user?.id?.slice(-4) || 'NULL'}
-        </div>
         
         {/* <CursorFollower /> */}
         <LazyMotion features={domAnimation}>
