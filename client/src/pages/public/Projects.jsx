@@ -7,6 +7,7 @@ import { ArrowLeft, ExternalLink, Github, Calendar } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
+import Comments from '../../components/ui/Comments';
 
 const PublicProjects = () => {
     const [selectedProject, setSelectedProject] = useState(null);
@@ -201,6 +202,9 @@ const PublicProjects = () => {
                                 </a>
                             )}
                         </div>
+                        
+                        {/* Discussion Area */}
+                        <Comments projectId={selectedProject.id} />
                     </div>
                 )}
             </Modal>

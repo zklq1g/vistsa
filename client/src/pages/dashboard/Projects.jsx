@@ -5,6 +5,8 @@ import ProjectCard from '../../components/cards/ProjectCard';
 import Modal from '../../components/ui/Modal';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
+import EmptyState from '../../components/ui/EmptyState';
+import Comments from '../../components/ui/Comments';
 import toast from 'react-hot-toast';
 import { ExternalLink, Github, Upload, X as XIcon } from 'lucide-react';
 
@@ -160,6 +162,9 @@ const DashboardHome = () => {
                                 </a>
                             ) : <span style={{ color: 'var(--c-text-muted)', fontSize: '0.85rem', alignSelf: 'center' }}>Demo link not provided.</span>}
                         </div>
+
+                        {/* Discussion Area */}
+                        <Comments projectId={selectedProject.id} />
                     </div>
                 )}
             </Modal>
