@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
+import Comments from '../../components/ui/Comments';
 import { Check, X, ExternalLink, Github, Pin, Eye, Calendar, User } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
@@ -219,6 +220,9 @@ const AdminApprovalQueue = () => {
                                 </Button>
                             </div>
                         )}
+
+                        {/* Discussion Area */}
+                        <Comments projectId={selectedProject.id} />
                     </div>
                 )}
             </Modal>
