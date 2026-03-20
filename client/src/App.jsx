@@ -4,22 +4,19 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { LazyMotion, domAnimation } from 'framer-motion';
 import AppRouter from './router';
-import CursorFollower from './components/layout/CursorFollower';
 import { useAuthStore } from './store/authStore';
 import api from './services/api';
 
-// Design system styles
 import './styles/tokens.css';
 import './styles/global.css';
-
 import GlobalErrorModal from './components/layout/GlobalErrorModal';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false, // Don't refetch on tab switch for dashboard
+      refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
     }
   }
 });
@@ -92,7 +89,6 @@ const App = () => {
           }} />
           <span>Restoring session...</span>
         </div>
-
         <button
           onClick={() => {
             useAuthStore.getState().logout();
@@ -114,7 +110,6 @@ const App = () => {
         >
           Taking too long? Click to reset session
         </button>
-
         <style>{`
           @keyframes spin { to { transform: rotate(360deg); } }
         `}</style>
@@ -125,12 +120,10 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <CursorFollower />
         <LazyMotion features={domAnimation}>
           <AppRouter />
         </LazyMotion>
       </BrowserRouter>
-
       <Toaster
         position="bottom-right"
         toastOptions={{
@@ -149,8 +142,6 @@ const App = () => {
           },
         }}
       />
-
-      {/* Global Error Popup triggered by api.js */}
       <GlobalErrorModal />
     </QueryClientProvider>
   );

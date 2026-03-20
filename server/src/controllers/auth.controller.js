@@ -1,30 +1,35 @@
 const authService = require('../services/auth.service');
+const userRepository = require('../repositories/user.repository');
 const { sendSuccess, sendError } = require('../utils/response.utils');
 
 class AuthController {
-    async login(req, res) {
-        try {
-            const { username, password } = req.body;
+  async login(req, res) {
+    try {
+      const { username, password } = req.body;
 
-            if (!username || !password) {
-                return sendError(res, 'Username and password are required', 400);
-            }
+      if (!username || !password) {
+        return sendError(res, 'Username and password are required', 400);
+      }
 
-            const data = await authService.login(username, password);
-            return sendSuccess(res, data, 'Login successful');
-        } catch (error) {
-            return sendError(res, error.message, 401);
-        }
+      const data = await authService.login(username, password);
+      return sendSuccess(res, data, 'Login successful');
+    } catch (error) {
+      return sendError(res, error.message, 401);
     }
+  }
 
-    async me(req, res) {
-        try {
-            // req.user is hydrated by auth.middleware
-            return sendSuccess(res, { user: req.user }, 'Current user data fetched');
-        } catch (error) {
-            return sendError(res, 'Error fetching user data', 500);
-        }
+  async me(req, res) {
+    try {
+      const user = await userRepository.findById(req.user.userId);
+      if (!user) {
+        return sendError(res, 'User not found', 404);
+      }
+      const { password: _, ...userWithoutPassword } = user;
+      return sendSuccess(res, { user: userWithoutPassword }, 'Current user data fetched');
+    } catch (error) {
+      return sendError(res, 'Error fetching user data', 500);
     }
+  }
 }
 
 module.exports = new AuthController();

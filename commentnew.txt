@@ -1,3 +1,404 @@
+
+
+// FILE: server/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  username    String   @unique
+  email       String?  @unique
+  displayName String
+  password    String
+  role        String   @default("MEMBER")
+  avatarUrl   String?
+  bio         String?
+  githubUrl   String?
+  linkedinUrl String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  projectMemberships ProjectMember[]
+  leaderboardEntry   LeaderboardEntry?
+  uploadedMaterials  StudyMaterial[]
+  createdEvents      Event[]
+  submittedProjects  Project[]          @relation("Submitter")
+  comments           Comment[]
+  commentLikes       CommentLike[]
+  commentReports     CommentReport[]
+}
+
+model Project {
+  id            String   @id @default(cuid())
+  title         String
+  description   String   @db.Text
+  techStack     String?
+  githubUrl     String?
+  demoUrl       String?
+  thumbnailUrl  String?
+  status        String   @default("ONGOING")
+  isPinned      Boolean  @default(false)
+  isApproved    Boolean  @default(false)
+  sortOrder     Int      @default(0)
+  submittedById String
+  submittedBy   User     @relation("Submitter", fields: [submittedById], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  members  ProjectMember[]
+  comments Comment[]
+}
+
+model ProjectMember {
+  id        String  @id @default(cuid())
+  projectId String
+  userId    String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+}
+
+model LeaderboardEntry {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  points      Int      @default(0)
+  lastUpdated DateTime @updatedAt
+}
+
+model Event {
+  id              String   @id @default(cuid())
+  title           String
+  description     String   @db.Text
+  eventDate       DateTime
+  location        String?
+  imageUrl        String?
+  registrationUrl String?
+  isPublished     Boolean  @default(false)
+  createdById     String
+  createdBy       User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model StudyMaterial {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  fileUrl      String?
+  externalUrl  String?
+  category     String
+  status       String   @default("PENDING")
+  uploadedById String
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+}
+
+model SiteStats {
+  id                 String   @id @default("singleton")
+  projectsCount      Int      @default(0)
+  bootcampsOrganized Int      @default(0)
+  activeMembers      Int      @default(0)
+  societyMembers     Int      @default(0)
+  updatedAt          DateTime @updatedAt
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    Comment? @relation("CommentThread", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Comment[] @relation("CommentThread")
+  likes     CommentLike[]
+  reports   CommentReport[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId])
+}
+
+model CommentReport {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId])
+}
+
+// FILE: server/src/repositories/comment.repository.js
+
+const { prisma } = require('../config');
+
+const userSelect = {
+  id: true,
+  displayName: true,
+  username: true,
+  avatarUrl: true
+};
+
+const CommentRepository = {
+  async findByProject(projectId) {
+    return prisma.comment.findMany({
+      where: { projectId },
+      include: {
+        user: { select: userSelect },
+        likes: { select: { userId: true } },
+        _count: { select: { likes: true, reports: true } },
+        children: {
+          include: {
+            user: { select: userSelect },
+            likes: { select: { userId: true } },
+            _count: { select: { likes: true, reports: true } },
+            children: {
+              include: {
+                user: { select: userSelect },
+                likes: { select: { userId: true } },
+                _count: { select: { likes: true, reports: true } },
+                children: {
+                  include: {
+                    user: { select: userSelect },
+                    likes: { select: { userId: true } },
+                    _count: { select: { likes: true, reports: true } },
+                  },
+                  orderBy: { createdAt: 'asc' }
+                }
+              },
+              orderBy: { createdAt: 'asc' }
+            }
+          },
+          orderBy: { createdAt: 'asc' }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  },
+
+  async findTopLevel(projectId) {
+    const all = await this.findByProject(projectId);
+    return all.filter(c => !c.parentId);
+  },
+
+  async create(data) {
+    return prisma.comment.create({
+      data,
+      include: {
+        user: { select: userSelect },
+        likes: { select: { userId: true } },
+        _count: { select: { likes: true, reports: true } },
+      }
+    });
+  },
+
+  async delete(id) {
+    return prisma.comment.delete({ where: { id } });
+  },
+
+  async findById(id) {
+    return prisma.comment.findUnique({
+      where: { id },
+      include: {
+        user: { select: userSelect },
+      }
+    });
+  },
+
+  async toggleLike(commentId, userId) {
+    const existing = await prisma.commentLike.findUnique({
+      where: { commentId_userId: { commentId, userId } }
+    });
+    if (existing) {
+      await prisma.commentLike.delete({ where: { id: existing.id } });
+      return { liked: false };
+    } else {
+      await prisma.commentLike.create({ data: { commentId, userId } });
+      return { liked: true };
+    }
+  },
+
+  async report(commentId, userId, reason) {
+    const existing = await prisma.commentReport.findUnique({
+      where: { commentId_userId: { commentId, userId } }
+    });
+    if (existing) {
+      return { alreadyReported: true };
+    }
+    await prisma.commentReport.create({ data: { commentId, userId, reason } });
+    return { alreadyReported: false };
+  }
+};
+
+module.exports = CommentRepository;
+
+// FILE: server/src/controllers/comment.controller.js
+
+const CommentRepository = require('../repositories/comment.repository');
+const { sendSuccess, sendError } = require('../utils/response.utils');
+const { prisma } = require('../config');
+
+const MAX_COMMENT_LENGTH = 2000;
+
+const CommentController = {
+  async getProjectComments(req, res) {
+    try {
+      const comments = await CommentRepository.findTopLevel(req.params.projectId);
+      return sendSuccess(res, comments, 'Comments fetched successfully');
+    } catch (err) {
+      return sendError(res, 'Failed to fetch comments', 500);
+    }
+  },
+
+  async addComment(req, res) {
+    try {
+      const { content, parentId } = req.body;
+      if (!content || !content.trim()) {
+        return sendError(res, 'Comment content is required', 400);
+      }
+
+      const trimmed = content.trim();
+
+      if (trimmed.length > MAX_COMMENT_LENGTH) {
+        return sendError(res, `Comment must be under ${MAX_COMMENT_LENGTH} characters`, 400);
+      }
+
+      if (parentId) {
+        const parent = await CommentRepository.findById(parentId);
+        if (!parent) {
+          return sendError(res, 'Parent comment not found', 404);
+        }
+        if (parent.projectId !== req.params.projectId) {
+          return sendError(res, 'Parent comment does not belong to this project', 400);
+        }
+      }
+
+      const newComment = await CommentRepository.create({
+        content: trimmed,
+        projectId: req.params.projectId,
+        userId: req.user.userId,
+        parentId: parentId || null
+      });
+      return sendSuccess(res, newComment, 'Comment posted successfully', 201);
+    } catch (err) {
+      return sendError(res, 'Failed to post comment', 500);
+    }
+  },
+
+  async deleteComment(req, res) {
+    try {
+      const comment = await CommentRepository.findById(req.params.id);
+      if (!comment) {
+        return sendError(res, 'Comment not found', 404);
+      }
+
+      const isOwner = comment.userId === req.user.userId;
+      const isMod = req.user.role === 'MOD' || req.user.role === 'ADMIN';
+
+      if (!isOwner && !isMod) {
+        return sendError(res, 'You do not have permission to delete this comment', 403);
+      }
+
+      await CommentRepository.delete(req.params.id);
+      return sendSuccess(res, null, 'Comment deleted successfully');
+    } catch (err) {
+      return sendError(res, 'Failed to delete comment', 500);
+    }
+  },
+
+  async toggleLike(req, res) {
+    try {
+      const result = await CommentRepository.toggleLike(req.params.id, req.user.userId);
+      return sendSuccess(res, result, result.liked ? 'Comment liked' : 'Like removed');
+    } catch (err) {
+      return sendError(res, 'Failed to toggle like', 500);
+    }
+  },
+
+  async reportComment(req, res) {
+    try {
+      const { reason } = req.body;
+      const result = await CommentRepository.report(req.params.id, req.user.userId, reason || null);
+      if (result.alreadyReported) {
+        return sendError(res, 'You have already reported this comment', 400);
+      }
+      return sendSuccess(res, null, 'Comment reported successfully');
+    } catch (err) {
+      return sendError(res, 'Failed to report comment', 500);
+    }
+  },
+
+  async searchUsers(req, res) {
+    try {
+      const { q } = req.query;
+      if (!q || q.length < 1) {
+        return sendSuccess(res, [], 'No query');
+      }
+      const users = await prisma.user.findMany({
+        where: {
+          isActive: true,
+          OR: [
+            { username: { contains: q, mode: 'insensitive' } },
+            { displayName: { contains: q, mode: 'insensitive' } }
+          ]
+        },
+        select: { id: true, username: true, displayName: true, avatarUrl: true },
+        take: 8
+      });
+      return sendSuccess(res, users, 'Users found');
+    } catch (err) {
+      return sendError(res, 'Failed to search users', 500);
+    }
+  }
+};
+
+module.exports = CommentController;
+
+// FILE: server/src/routes/comment.routes.js
+
+const express = require('express');
+const router = express.Router();
+const CommentController = require('../controllers/comment.controller');
+const authMiddleware = require('../middleware/auth.middleware');
+
+router.get('/project/:projectId', CommentController.getProjectComments);
+
+router.use(authMiddleware);
+
+router.post('/project/:projectId', CommentController.addComment);
+router.delete('/:id', CommentController.deleteComment);
+router.post('/:id/like', CommentController.toggleLike);
+router.post('/:id/report', CommentController.reportComment);
+router.get('/users/search', CommentController.searchUsers);
+
+module.exports = router;
+
+// FILE: client/src/components/ui/Comments.jsx
+
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -441,10 +842,10 @@ const CommentNode = ({ comment, depth, projectId, user }) => {
           <AnimatePresence>
             {isReplying && (
               <motion.div
-                initial={{ opacity: 0, height: 0, overflow: 'hidden' }}
-                animate={{ opacity: 1, height: 'auto', transitionEnd: { overflow: 'visible' } }}
-                exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
-                style={{ marginTop: '10px' }}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                style={{ overflow: 'hidden', marginTop: '10px' }}
               >
                 <div style={{
                   display: 'flex', gap: '8px', alignItems: 'flex-start',

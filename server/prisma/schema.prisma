@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
@@ -11,15 +8,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─────────────────────────────────────────────
-// USER
-// ─────────────────────────────────────────────
 model User {
   id          String   @id @default(cuid())
-  username    String   @unique                // "john_doe"
-  displayName String                          // "John Doe"
-  password    String                          // bcrypt hash
-  role        String   @default("MEMBER")     // "VISITOR", "MEMBER", "ADMIN"
+  username    String   @unique
+  email       String?  @unique
+  displayName String
+  password    String
+  role        String   @default("MEMBER")
   avatarUrl   String?
   bio         String?
   githubUrl   String?
@@ -28,43 +23,37 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relations
   projectMemberships ProjectMember[]
   leaderboardEntry   LeaderboardEntry?
   uploadedMaterials  StudyMaterial[]
   createdEvents      Event[]
-  submittedProjects  Project[]         @relation("Submitter")
+  submittedProjects  Project[]          @relation("Submitter")
   comments           Comment[]
+  commentLikes       CommentLike[]
+  commentReports     CommentReport[]
 }
 
-// ─────────────────────────────────────────────
-// PROJECT
-// ─────────────────────────────────────────────
 model Project {
-  id            String        @id @default(cuid())
+  id            String   @id @default(cuid())
   title         String
-  description   String        @db.Text
-  techStack     String?       // "Python, OpenCV, React"
+  description   String   @db.Text
+  techStack     String?
   githubUrl     String?
   demoUrl       String?
   thumbnailUrl  String?
-  status        String        @default("ONGOING") // "COMPLETED", "ONGOING", "IDLE", "DEAD"
-  isPinned      Boolean       @default(false)   // admin-only, never exposed to public
-  isApproved    Boolean       @default(false)   // false until admin approves
-  sortOrder     Int           @default(0)       // for future manual ordering
+  status        String   @default("ONGOING")
+  isPinned      Boolean  @default(false)
+  isApproved    Boolean  @default(false)
+  sortOrder     Int      @default(0)
   submittedById String
-  submittedBy   User          @relation("Submitter", fields: [submittedById], references: [id], onDelete: Cascade)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  submittedBy   User     @relation("Submitter", fields: [submittedById], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  // Relations
-  members       ProjectMember[]
-  comments      Comment[]
+  members  ProjectMember[]
+  comments Comment[]
 }
 
-// ─────────────────────────────────────────────
-// PROJECT MEMBERS (join table)
-// ─────────────────────────────────────────────
 model ProjectMember {
   id        String  @id @default(cuid())
   projectId String
@@ -72,70 +61,54 @@ model ProjectMember {
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([projectId, userId])   // prevent duplicate membership
+  @@unique([projectId, userId])
 }
 
-// ─────────────────────────────────────────────
-// LEADERBOARD (separate table as spec'd)
-// ─────────────────────────────────────────────
 model LeaderboardEntry {
   id          String   @id @default(cuid())
   userId      String   @unique
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   points      Int      @default(0)
-  // projectCount is computed from JOIN — not stored
   lastUpdated DateTime @updatedAt
 }
 
-// ─────────────────────────────────────────────
-// EVENTS
-// ─────────────────────────────────────────────
 model Event {
-  id          String    @id @default(cuid())
-  title       String
-  description String    @db.Text
-  eventDate   DateTime
-  location    String?                     // "Room 302, CSE Block" or "Online"
-  imageUrl    String?
+  id              String   @id @default(cuid())
+  title           String
+  description     String   @db.Text
+  eventDate       DateTime
+  location        String?
+  imageUrl        String?
   registrationUrl String?
-  isPublished Boolean   @default(false)
-  createdById String
-  createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  isPublished     Boolean  @default(false)
+  createdById     String
+  createdBy       User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
-// ─────────────────────────────────────────────
-// STUDY MATERIALS
-// ─────────────────────────────────────────────
 model StudyMaterial {
-  id          String            @id @default(cuid())
-  title       String
-  description String?
-  fileUrl     String?
-  externalUrl String?
-  category    String            // "ROADMAP", "PAPER", "TUTORIAL", "RESOURCE", "OTHER"
-  status      String            @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  fileUrl      String?
+  externalUrl  String?
+  category     String
+  status       String   @default("PENDING")
   uploadedById String
-  uploadedBy  User              @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
-  createdAt   DateTime          @default(now())
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
 }
 
-// ─────────────────────────────────────────────
-// SITE STATS (admin-editable homepage counters)
-// ─────────────────────────────────────────────
 model SiteStats {
-  id                 String @id @default("singleton") // Only one row, always id="singleton"
-  projectsCount      Int    @default(0)
-  bootcampsOrganized Int    @default(0)
-  activeMembers      Int    @default(0)
-  societyMembers     Int    @default(0)
+  id                 String   @id @default("singleton")
+  projectsCount      Int      @default(0)
+  bootcampsOrganized Int      @default(0)
+  activeMembers      Int      @default(0)
+  societyMembers     Int      @default(0)
   updatedAt          DateTime @updatedAt
 }
 
-// ─────────────────────────────────────────────
-// COMMENTS
-// ─────────────────────────────────────────────
 model Comment {
   id        String   @id @default(cuid())
   content   String   @db.Text
@@ -143,6 +116,34 @@ model Comment {
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    Comment? @relation("CommentThread", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Comment[] @relation("CommentThread")
+  likes     CommentLike[]
+  reports   CommentReport[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId])
+}
+
+model CommentReport {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId])
 }

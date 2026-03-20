@@ -3,13 +3,14 @@ const router = express.Router();
 const CommentController = require('../controllers/comment.controller');
 const authMiddleware = require('../middleware/auth.middleware');
 
-// Public: Get comments for a project
 router.get('/project/:projectId', CommentController.getProjectComments);
 
-// Protected: Post a comment
-router.post('/project/:projectId', authMiddleware, CommentController.addComment);
+router.use(authMiddleware);
 
-// Protected: Delete a comment (Author or Admin)
-router.delete('/:id', authMiddleware, CommentController.deleteComment);
+router.post('/project/:projectId', CommentController.addComment);
+router.delete('/:id', CommentController.deleteComment);
+router.post('/:id/like', CommentController.toggleLike);
+router.post('/:id/report', CommentController.reportComment);
+router.get('/users/search', CommentController.searchUsers);
 
 module.exports = router;
