@@ -24,7 +24,9 @@ api.interceptors.request.use(
 
 // Response Interceptor (handle auth errors globally)
 api.interceptors.response.use(
-    (response) => response.data, // Strip axios wrapper, return our formatted data
+    (response) => {
+        return response.data;
+    },
     (error) => {
         const status = error.response?.status;
         const message = error.response?.data?.message || 'Something went wrong';
